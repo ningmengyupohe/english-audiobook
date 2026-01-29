@@ -1,0 +1,21 @@
+{
+  "bsonType": "object",
+  "required": ["_id", "name", "gameType"],
+  "properties": {
+    "_id": { "description": "游戏ID" },
+    "name": { "bsonType": "string", "label": "游戏名称", "maxLength": 50 },
+    "icon": { "bsonType": "string", "label": "游戏图标地址" },
+    "description": { "bsonType": "string", "label": "游戏简介" },
+    "rules": { "bsonType": "string", "label": "游戏规则说明" },
+    "gameType": { "bsonType": "string", "label": "游戏类型", "enum": ["单词闯关", "听力匹配", "词汇挑战", "拼写测试"] },
+    "difficulty": { "bsonType": "string", "label": "难度等级", "enum": ["简单", "中等", "困难"], "defaultValue": "中等" },
+    "maxScore": { "bsonType": "int", "label": "最高分数限制", "minimum": 0, "defaultValue": 1000 },
+    "isActive": { "bsonType": "bool", "label": "是否启用", "defaultValue": true },
+    "sort": { "bsonType": "int", "label": "排序序号", "minimum": 0, "defaultValue": 0 },
+    "createTime": { "bsonType": "timestamp", "label": "创建时间", "defaultValue": { "$env": "now" } }
+  },
+  "indexes": [
+    { "name": "gameType_1", "key": { "gameType": 1 } },
+    { "name": "isActive_1_sort_1", "key": { "isActive": 1, "sort": 1 } }
+  ]
+}

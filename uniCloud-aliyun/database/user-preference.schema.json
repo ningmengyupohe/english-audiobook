@@ -1,0 +1,17 @@
+{
+  "bsonType": "object",
+  "required": ["_id", "userId", "totalListenTime"],
+  "properties": {
+    "_id": { "description": "偏好记录ID" },
+    "userId": { "bsonType": "string", "label": "用户ID", "foreignKey": "user._id" },
+    "preferenceCategories": { "bsonType": "array", "label": "偏好分类", "items": { "bsonType": "string" }, "defaultValue": [] },
+    "favoriteAuthors": { "bsonType": "array", "label": "偏好作者", "items": { "bsonType": "string" }, "defaultValue": [] },
+    "totalListenTime": { "bsonType": "int", "label": "累计收听时长(秒)", "minimum": 0, "defaultValue": 0 },
+    "dailyGoal": { "bsonType": "int", "label": "每日目标(分钟)", "minimum": 0, "defaultValue": 30 },
+    "notification": { "bsonType": "bool", "label": "接收通知", "defaultValue": true },
+    "lastUpdateTime": { "bsonType": "timestamp", "label": "更新时间", "defaultValue": { "$env": "now" } }
+  },
+  "indexes": [
+    { "name": "userId_1", "key": { "userId": 1 }, "unique": true }
+  ]
+}

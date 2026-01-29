@@ -1,0 +1,19 @@
+{
+  "bsonType": "object",
+  "required": ["_id", "userId", "gameId", "score"],
+  "properties": {
+    "_id": { "description": "游戏记录ID" },
+    "userId": { "bsonType": "string", "label": "用户ID", "foreignKey": "user._id" },
+    "gameId": { "bsonType": "string", "label": "游戏ID", "foreignKey": "game-info._id" },
+    "score": { "bsonType": "int", "label": "游戏得分", "minimum": 0, "defaultValue": 0 },
+    "playTime": { "bsonType": "int", "label": "游玩时间(秒)", "minimum": 0 },
+    "playDate": { "bsonType": "timestamp", "label": "游玩时间", "defaultValue": { "$env": "now" } },
+    "level": { "bsonType": "int", "label": "关卡/等级", "minimum": 1, "defaultValue": 1 },
+    "extraData": { "bsonType": "object", "label": "额外游戏数据" }
+  },
+  "indexes": [
+    { "name": "userId_1_gameId_1", "key": { "userId": 1, "gameId": 1 } },
+    { "name": "userId_1_playDate_-1", "key": { "userId": 1, "playDate": -1 } },
+    { "name": "gameId_1_score_-1", "key": { "gameId": 1, "score": -1 } }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "bsonType": "object",
+  "required": ["_id", "userId", "bookId"],
+  "properties": {
+    "_id": { "description": "完成记录ID" },
+    "userId": { "bsonType": "string", "label": "用户ID", "foreignKey": "user._id" },
+    "bookId": { "bsonType": "string", "label": "书籍ID", "foreignKey": "book-info._id" },
+    "finishTime": { "bsonType": "timestamp", "label": "完成时间", "defaultValue": { "$env": "now" } },
+    "totalTimeSpent": { "bsonType": "int", "label": "总花费时间(秒)", "minimum": 0 },
+    "chaptersCompleted": { "bsonType": "int", "label": "完成的章节数", "minimum": 0 }
+  },
+  "indexes": [
+    { "name": "userId_1_bookId_1", "key": { "userId": 1, "bookId": 1 }, "unique": true },
+    { "name": "userId_1_finishTime_-1", "key": { "userId": 1, "finishTime": -1 } }
+  ]
+}

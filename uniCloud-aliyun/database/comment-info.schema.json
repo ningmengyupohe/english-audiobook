@@ -1,0 +1,23 @@
+{
+  "bsonType": "object",
+  "required": ["_id", "userId", "targetType", "targetId", "content"],
+  "properties": {
+    "_id": { "description": "评论ID" },
+    "userId": { "bsonType": "string", "label": "用户ID", "foreignKey": "user._id" },
+    "targetType": { "bsonType": "string", "label": "评论对象类型", "enum": ["书籍", "章节", "评论"], "defaultValue": "书籍" },
+    "targetId": { "bsonType": "string", "label": "评论对象ID" },
+    "content": { "bsonType": "string", "label": "评论内容", "maxLength": 1000 },
+    "likeCount": { "bsonType": "int", "label": "评论点赞数", "minimum": 0, "defaultValue": 0 },
+    "replyCount": { "bsonType": "int", "label": "回复数", "minimum": 0, "defaultValue": 0 },
+    "parentId": { "bsonType": "string", "label": "父评论ID", "foreignKey": "comment-info._id", "defaultValue": "" },
+    "status": { "bsonType": "string", "label": "审核状态", "enum": ["通过", "待审核", "驳回"], "defaultValue": "待审核" },
+    "createTime": { "bsonType": "timestamp", "label": "评论时间", "defaultValue": { "$env": "now" } },
+    "updateTime": { "bsonType": "timestamp", "label": "更新时间", "defaultValue": { "$env": "now" } }
+  },
+  "indexes": [
+    { "name": "targetType_1_targetId_1", "key": { "targetType": 1, "targetId": 1 } },
+    { "name": "userId_1_createTime_-1", "key": { "userId": 1, "createTime": -1 } },
+    { "name": "parentId_1", "key": { "parentId": 1 } },
+    { "name": "status_1", "key": { "status": 1 } }
+  ]
+}

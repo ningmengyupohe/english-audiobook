@@ -1,0 +1,17 @@
+{
+  "bsonType": "object",
+  "required": ["_id", "userId", "chapterId", "progress"],
+  "properties": {
+    "_id": { "description": "收听历史ID" },
+    "userId": { "bsonType": "string", "label": "用户ID", "foreignKey": "user._id" },
+    "chapterId": { "bsonType": "string", "label": "章节ID", "foreignKey": "book-chapter._id" },
+    "listenTime": { "bsonType": "timestamp", "label": "收听时间", "defaultValue": { "$env": "now" } },
+    "progress": { "bsonType": "int", "label": "收听进度(秒)", "minimum": 0, "defaultValue": 0 },
+    "duration": { "bsonType": "int", "label": "章节总时长", "minimum": 0 },
+    "completed": { "bsonType": "bool", "label": "是否听完", "defaultValue": false }
+  },
+  "indexes": [
+    { "name": "userId_1_listenTime_-1", "key": { "userId": 1, "listenTime": -1 } },
+    { "name": "userId_1_chapterId_1", "key": { "userId": 1, "chapterId": 1 }, "unique": true }
+  ]
+}

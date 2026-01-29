@@ -1,0 +1,16 @@
+{
+  "bsonType": "object",
+  "required": ["_id", "userId", "chapterId"],
+  "properties": {
+    "_id": { "description": "下载记录ID" },
+    "userId": { "bsonType": "string", "label": "用户ID", "foreignKey": "user._id" },
+    "chapterId": { "bsonType": "string", "label": "章节ID", "foreignKey": "book-chapter._id" },
+    "downloadTime": { "bsonType": "timestamp", "label": "下载时间", "defaultValue": { "$env": "now" } },
+    "localPath": { "bsonType": "string", "label": "本地文件存储路径" },
+    "fileSize": { "bsonType": "int", "label": "文件大小(字节)", "minimum": 0 }
+  },
+  "indexes": [
+    { "name": "userId_1_chapterId_1", "key": { "userId": 1, "chapterId": 1 }, "unique": true },
+    { "name": "userId_1_downloadTime_-1", "key": { "userId": 1, "downloadTime": -1 } }
+  ]
+}

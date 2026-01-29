@@ -1,0 +1,26 @@
+{
+  "bsonType": "object",
+  "required": ["_id", "username", "phone", "createTime"],
+  "properties": {
+    "_id": { "description": "用户ID" },
+    "username": { "bsonType": "string", "label": "用户名", "maxLength": 50 },
+    "password": { "bsonType": "string", "label": "密码", "writeonly": true },
+    "phone": { "bsonType": "string", "label": "手机号", "format": "phone" },
+    "email": { "bsonType": "string", "label": "邮箱", "format": "email" },
+    "avatar": { "bsonType": "string", "label": "头像地址", "defaultValue": "/images/avatar/default.png" },
+    "level": { "bsonType": "string", "label": "英语水平", "enum": ["初级", "中级", "高级"], "defaultValue": "初级" },
+    "reportCount": { "bsonType": "int", "label": "被举报次数", "minimum": 0, "defaultValue": 0 },
+    "likeCount": { "bsonType": "int", "label": "获赞数", "minimum": 0, "defaultValue": 0 },
+    "status": { "bsonType": "string", "label": "账号状态", "enum": ["正常", "禁用", "审核中"], "defaultValue": "正常" },
+    "createTime": { "bsonType": "timestamp", "label": "创建时间", "defaultValue": { "$env": "now" } },
+    "updateTime": { "bsonType": "timestamp", "label": "更新时间", "defaultValue": { "$env": "now" } },
+    // 🚨 新增字段
+    "token": { "bsonType": "string", "label": "登录令牌" },
+    "lastLoginTime": { "bsonType": "timestamp", "label": "最后登录时间" }
+  },
+  "indexes": [
+    { "name": "username_1", "key": { "username": 1 }, "unique": true },
+    { "name": "phone_1", "key": { "phone": 1 }, "unique": true },
+    { "name": "level_1", "key": { "level": 1 } }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "name": "chapter-service",
+  "version": "1.0.0",
+  "description": "章节服务云函数",
+  "main": "index.js",
+  "dependencies": {}
+}

@@ -1,0 +1,7 @@
+{
+  "name": "shelf-service",
+  "version": "1.0.0",
+  "description": "书架服务云函数",
+  "main": "index.js",
+  "dependencies": {}
+}

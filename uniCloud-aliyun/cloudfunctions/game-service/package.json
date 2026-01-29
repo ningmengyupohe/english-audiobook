@@ -1,0 +1,7 @@
+{
+  "name": "game-service",
+  "version": "1.0.0",
+  "description": "游戏服务云函数",
+  "main": "index.js",
+  "dependencies": {}
+}

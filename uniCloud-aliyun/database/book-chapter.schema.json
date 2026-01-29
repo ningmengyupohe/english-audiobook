@@ -1,0 +1,22 @@
+{
+  "bsonType": "object",
+  "required": ["_id", "bookId", "title", "audioUrl", "sort"],
+  "properties": {
+    "_id": { "description": "章节ID" },
+    "bookId": { "bsonType": "string", "label": "书籍ID", "foreignKey": "book-info._id" },
+    "title": { "bsonType": "string", "label": "章节标题", "maxLength": 100 },
+    "audioUrl": { "bsonType": "string", "label": "音频文件地址" },
+    "duration": { "bsonType": "int", "label": "章节时长(秒)", "minimum": 0 },
+    "fileSize": { "bsonType": "int", "label": "文件大小(字节)", "minimum": 0 },
+    "sort": { "bsonType": "int", "label": "排序序号", "minimum": 0 },
+    "likeCount": { "bsonType": "int", "label": "章节点赞数", "minimum": 0, "defaultValue": 0 },
+    "isFree": { "bsonType": "bool", "label": "是否免费", "defaultValue": true },
+    "subtitle": { "bsonType": "string", "label": "字幕内容(JSON格式)" },
+    "wordCount": { "bsonType": "int", "label": "单词数量", "minimum": 0 },
+    "createTime": { "bsonType": "timestamp", "label": "创建时间", "defaultValue": { "$env": "now" } }
+  },
+  "indexes": [
+    { "name": "bookId_1_sort_1", "key": { "bookId": 1, "sort": 1 } },
+    { "name": "bookId_1", "key": { "bookId": 1 } }
+  ]
+}

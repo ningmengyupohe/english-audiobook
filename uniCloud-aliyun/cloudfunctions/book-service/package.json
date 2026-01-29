@@ -1,0 +1,7 @@
+{
+  "name": "book-service",
+  "version": "1.0.0",
+  "description": "书籍服务云函数",
+  "main": "index.js",
+  "dependencies": {}
+}

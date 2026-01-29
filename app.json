@@ -1,0 +1,70 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/category/category",
+    "pages/bookshelf/bookshelf",
+    "pages/profile/profile",
+    "pages/player/player",
+    "pages/login/login",
+    "pages/register/register",
+    "pages/category-list/category-list",
+    "pages/book-detail/book-detail",
+    "pages/settings/settings",
+    "pages/help/help",
+    "pages/feedback/feedback",
+    "pages/user-info/user-info",
+    "pages/search/search",
+    "pages/my-books/my-books",
+    "pages/games/listening/listening",
+    "pages/games/spelling/spelling",
+    "pages/games/wordmatch/wordmatch"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#4A90E2",
+    "navigationBarTitleText": "英语听书",
+    "navigationBarTextStyle": "white"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#4A90E2",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "text": "首页",
+        "iconPath": "images/tab/home.png",
+        "selectedIconPath": "images/tab/home-active.png"
+      },
+      {
+        "pagePath": "pages/category/category",
+        "text": "分类",
+        "iconPath": "images/tab/category.png",
+        "selectedIconPath": "images/tab/category-active.png"
+      },
+      {
+        "pagePath": "pages/bookshelf/bookshelf",
+        "text": "书架",
+        "iconPath": "images/tab/bookshelf.png",
+        "selectedIconPath": "images/tab/bookshelf-active.png"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的",
+        "iconPath": "images/tab/profile.png",
+        "selectedIconPath": "images/tab/profile-active.png"
+      }
+    ]
+  },
+  "requiredBackgroundModes": [
+    "audio"
+  ],
+  "permission": {
+    "scope.userLocation": {
+      "desc": "你的位置信息将用于小程序位置接口的效果展示"
+    }
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

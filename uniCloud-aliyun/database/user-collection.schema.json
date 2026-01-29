@@ -1,0 +1,14 @@
+{
+  "bsonType": "object",
+  "required": ["_id", "userId", "bookId"],
+  "properties": {
+    "_id": { "description": "收藏记录ID" },
+    "userId": { "bsonType": "string", "label": "用户ID", "foreignKey": "user._id" },
+    "bookId": { "bsonType": "string", "label": "书籍ID", "foreignKey": "book-info._id" },
+    "collectTime": { "bsonType": "timestamp", "label": "收藏时间", "defaultValue": { "$env": "now" } }
+  },
+  "indexes": [
+    { "name": "userId_1_bookId_1", "key": { "userId": 1, "bookId": 1 }, "unique": true },
+    { "name": "userId_1_collectTime_-1", "key": { "userId": 1, "collectTime": -1 } }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "bsonType": "object",
+  "required": ["_id", "gameId", "userId", "score", "rankDate"],
+  "properties": {
+    "_id": { "description": "排行榜记录ID" },
+    "gameId": { "bsonType": "string", "label": "游戏ID", "foreignKey": "game-info._id" },
+    "userId": { "bsonType": "string", "label": "用户ID", "foreignKey": "user._id" },
+    "score": { "bsonType": "int", "label": "游戏得分", "minimum": 0 },
+    "rank": { "bsonType": "int", "label": "排名", "minimum": 1 },
+    "rankType": { "bsonType": "string", "label": "排行榜类型", "enum": ["日榜", "周榜", "月榜", "总榜"], "defaultValue": "日榜" },
+    "rankDate": { "bsonType": "timestamp", "label": "排行统计时间" },
+    "updateTime": { "bsonType": "timestamp", "label": "更新时间", "defaultValue": { "$env": "now" } }
+  },
+  "indexes": [
+    { "name": "gameId_1_rankType_1_rankDate_-1_score_-1", "key": { "gameId": 1, "rankType": 1, "rankDate": -1, "score": -1 } },
+    { "name": "userId_1_gameId_1_rankType_1", "key": { "userId": 1, "gameId": 1, "rankType": 1 } }
+  ]
+}

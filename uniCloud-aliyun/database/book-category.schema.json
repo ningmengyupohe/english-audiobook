@@ -1,0 +1,17 @@
+{
+  "bsonType": "object",
+  "required": ["_id", "name", "sort"],
+  "properties": {
+    "_id": { "description": "分类ID" },
+    "name": { "bsonType": "string", "label": "分类名称", "maxLength": 50 },
+    "parentId": { "bsonType": "string", "label": "父分类ID", "foreignKey": "book-category._id", "defaultValue": "" },
+    "sort": { "bsonType": "int", "label": "排序序号", "minimum": 0, "defaultValue": 0 },
+    "icon": { "bsonType": "string", "label": "分类图标地址" },
+    "description": { "bsonType": "string", "label": "分类描述" },
+    "bookCount": { "bsonType": "int", "label": "书籍数量", "minimum": 0, "defaultValue": 0 }
+  },
+  "indexes": [
+    { "name": "sort_1", "key": { "sort": 1 } },
+    { "name": "parentId_1", "key": { "parentId": 1 } }
+  ]
+}

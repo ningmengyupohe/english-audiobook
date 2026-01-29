@@ -1,0 +1,604 @@
+// cloudfunctions/book-service/index.js
+'use strict';
+const db = uniCloud.database();
+const $ = db.command.aggregate;
+const Response = require('../common/response');
+const Utils = require('../common/utils');
+const Auth = require('../common/auth');
+
+exports.main = async (event, context) => {
+  const { action, data } = event;
+  
+  try {
+    // 公开接口（不需要登录）
+    const publicActions = ['getBookList', 'getBookDetail', 'searchBooks', 'getHotBooks', 'getNewBooks'];
+    
+    // 需要登录的接口
+    if (!publicActions.includes(action)) {
+      const user = await Auth.middleware(event);
+      event.user = user;
+    }
+
+    // 路由到对应的处理函数
+    switch (action) {
+      case 'getBookList':
+        return await getBookList(data);
+      case 'getBookDetail':
+        return await getBookDetail(data);
+      case 'searchBooks':
+        return await searchBooks(data);
+      case 'getHotBooks':
+        return await getHotBooks(data);
+      case 'getNewBooks':
+        return await getNewBooks(data);
+      case 'getBooksByCategory':
+        return await getBooksByCategory(data);
+      case 'getRecommendBooks':
+        return await getRecommendBooks(event.user?._id, data);
+      case 'addBook':
+        return await addBook(data);
+      case 'updateBook':
+        return await updateBook(data);
+      case 'deleteBook':
+        return await deleteBook(data);
+      case 'likeBook':
+        return await likeBook(event.user._id, data);
+      case 'cancelLikeBook':
+        return await cancelLikeBook(event.user._id, data);
+      default:
+        return Response.error('未知的操作类型', 400);
+    }
+  } catch (error) {
+    console.error('书籍服务错误:', error);
+    return Response.error(error.message);
+  }
+};
+
+// 获取书籍列表（带分页和筛选）
+async function getBookList(data) {
+  const { 
+    page = 1, 
+    pageSize = 10, 
+    categoryId, 
+    level, 
+    status,
+    sortBy = 'createTime',
+    order = 'desc'
+  } = data;
+
+  const { skip, limit } = Utils.handlePagination(page, pageSize);
+  const bookCollection = db.collection('book-info');
+  const categoryCollection = db.collection('book-category');
+
+  // 构建查询条件
+  let query = bookCollection.where({});
+
+  if (categoryId) {
+    query = query.where({ categoryId });
+  }
+
+  if (level) {
+    query = query.where({ level });
+  }
+
+  if (status) {
+    query = query.where({ status });
+  }
+
+  // 排序
+  const sortOptions = {};
+  sortOptions[sortBy] = order === 'desc' ? -1 : 1;
+
+  // 执行查询
+  const [booksResult, totalResult] = await Promise.all([
+    query
+      .field({
+        _id: true,
+        title: true,
+        author: true,
+        cover: true,
+        description: true,
+        level: true,
+        totalChapters: true,
+        totalDuration: true,
+        likeCount: true,
+        commentCount: true,
+        popularity: true,
+        createTime: true
+      })
+      .orderBy(sortOptions.sortBy || 'createTime', sortOptions.order || 'desc')
+      .skip(skip)
+      .limit(limit)
+      .get(),
+    query.count()
+  ]);
+
+  // 获取分类名称
+  const bookIds = booksResult.data.map(book => book.categoryId);
+  const categoriesResult = await categoryCollection.where({
+    _id: db.command.in(bookIds)
+  }).get();
+
+  const categoryMap = {};
+  categoriesResult.data.forEach(cat => {
+    categoryMap[cat._id] = cat.name;
+  });
+
+  // 添加分类名称到书籍数据
+  const books = booksResult.data.map(book => ({
+    ...book,
+    categoryName: categoryMap[book.categoryId] || '未知分类'
+  }));
+
+  return Response.success({
+    list: books,
+    pagination: {
+      page,
+      pageSize,
+      total: totalResult.total,
+      totalPages: Math.ceil(totalResult.total / pageSize)
+    }
+  });
+}
+
+// 获取书籍详情
+async function getBookDetail(data) {
+  const { bookId } = data;
+
+  if (!bookId) {
+    return Response.validationError('书籍ID不能为空');
+  }
+
+  const bookCollection = db.collection('book-info');
+  const categoryCollection = db.collection('book-category');
+  const chapterCollection = db.collection('book-chapter');
+
+  // 获取书籍基本信息
+  const bookResult = await bookCollection.doc(bookId).get();
+  if (bookResult.data.length === 0) {
+    return Response.notFound('书籍不存在');
+  }
+
+  const book = bookResult.data[0];
+
+  // 获取分类信息
+  const categoryResult = await categoryCollection.doc(book.categoryId).get();
+  const category = categoryResult.data[0] || {};
+
+  // 获取前5章章节信息
+  const chaptersResult = await chapterCollection
+    .where({ bookId })
+    .orderBy('sort', 'asc')
+    .limit(5)
+    .field({
+      _id: true,
+      title: true,
+      duration: true,
+      isFree: true,
+      sort: true
+    })
+    .get();
+
+  // 获取相关书籍（同分类）
+  const relatedBooksResult = await bookCollection
+    .where({
+      categoryId: book.categoryId,
+      _id: db.command.neq(bookId)
+    })
+    .orderBy('popularity', 'desc')
+    .limit(3)
+    .field({
+      _id: true,
+      title: true,
+      cover: true,
+      author: true,
+      level: true
+    })
+    .get();
+
+  return Response.success({
+    ...book,
+    categoryName: category.name,
+    categoryIcon: category.icon,
+    chapters: chaptersResult.data,
+    relatedBooks: relatedBooksResult.data
+  });
+}
+
+// 搜索书籍
+async function searchBooks(data) {
+  const { keyword, page = 1, pageSize = 10 } = data;
+
+  if (!keyword || keyword.trim() === '') {
+    return Response.validationError('搜索关键词不能为空');
+  }
+
+  const { skip, limit } = Utils.handlePagination(page, pageSize);
+  const bookCollection = db.collection('book-info');
+
+  // 构建搜索条件：标题或作者包含关键词
+  const query = bookCollection.where(
+    db.command.or([
+      { title: new RegExp(keyword, 'i') },
+      { author: new RegExp(keyword, 'i') },
+      { description: new RegExp(keyword, 'i') }
+    ])
+  );
+
+  const [booksResult, totalResult] = await Promise.all([
+    query
+      .field({
+        _id: true,
+        title: true,
+        author: true,
+        cover: true,
+        description: true,
+        level: true,
+        totalChapters: true,
+        totalDuration: true,
+        likeCount: true
+      })
+      .orderBy('popularity', 'desc')
+      .skip(skip)
+      .limit(limit)
+      .get(),
+    query.count()
+  ]);
+
+  return Response.success({
+    list: booksResult.data,
+    pagination: {
+      page,
+      pageSize,
+      total: totalResult.total,
+      totalPages: Math.ceil(totalResult.total / pageSize)
+    }
+  });
+}
+
+// 获取热门书籍
+async function getHotBooks(data) {
+  const { limit = 10 } = data;
+  const bookCollection = db.collection('book-info');
+
+  const result = await bookCollection
+    .where({})
+    .orderBy('popularity', 'desc')
+    .limit(limit)
+    .field({
+      _id: true,
+      title: true,
+      author: true,
+      cover: true,
+      level: true,
+      popularity: true,
+      totalChapters: true
+    })
+    .get();
+
+  return Response.success(result.data);
+}
+
+// 获取新书推荐
+async function getNewBooks(data) {
+  const { limit = 10 } = data;
+  const bookCollection = db.collection('book-info');
+
+  const result = await bookCollection
+    .where({})
+    .orderBy('createTime', 'desc')
+    .limit(limit)
+    .field({
+      _id: true,
+      title: true,
+      author: true,
+      cover: true,
+      level: true,
+      createTime: true,
+      totalChapters: true
+    })
+    .get();
+
+  return Response.success(result.data);
+}
+
+// 根据分类获取书籍
+async function getBooksByCategory(data) {
+  const { categoryId, page = 1, pageSize = 10 } = data;
+
+  if (!categoryId) {
+    return Response.validationError('分类ID不能为空');
+  }
+
+  const { skip, limit } = Utils.handlePagination(page, pageSize);
+  const bookCollection = db.collection('book-info');
+
+  const [booksResult, totalResult] = await Promise.all([
+    bookCollection
+      .where({ categoryId })
+      .orderBy('popularity', 'desc')
+      .skip(skip)
+      .limit(limit)
+      .field({
+        _id: true,
+        title: true,
+        author: true,
+        cover: true,
+        level: true,
+        totalChapters: true,
+        totalDuration: true,
+        likeCount: true
+      })
+      .get(),
+    bookCollection.where({ categoryId }).count()
+  ]);
+
+  return Response.success({
+    list: booksResult.data,
+    pagination: {
+      page,
+      pageSize,
+      total: totalResult.total,
+      totalPages: Math.ceil(totalResult.total / pageSize)
+    }
+  });
+}
+
+// 获取推荐书籍（基于用户偏好）
+async function getRecommendBooks(userId, data) {
+  const { limit = 10 } = data;
+  
+  if (!userId) {
+    // 如果用户未登录，返回热门书籍
+    return getHotBooks({ limit });
+  }
+
+  const preferenceCollection = db.collection('user-preference');
+  const bookCollection = db.collection('book-info');
+  
+  // 获取用户偏好
+  const preferenceResult = await preferenceCollection.where({ userId }).get();
+  const preference = preferenceResult.data[0];
+  
+  let query = bookCollection.where({});
+  
+  // 如果有偏好分类，优先推荐
+  if (preference && preference.preferenceCategories.length > 0) {
+    query = query.where({
+      categoryId: db.command.in(preference.preferenceCategories)
+    });
+  }
+  
+  const result = await query
+    .orderBy('popularity', 'desc')
+    .limit(limit)
+    .field({
+      _id: true,
+      title: true,
+      author: true,
+      cover: true,
+      level: true,
+      categoryId: true,
+      totalChapters: true,
+      likeCount: true
+    })
+    .get();
+
+  return Response.success(result.data);
+}
+
+// 点赞书籍
+async function likeBook(userId, data) {
+  const { bookId } = data;
+
+  if (!bookId) {
+    return Response.validationError('书籍ID不能为空');
+  }
+
+  const db = uniCloud.database();
+  const bookCollection = db.collection('book-info');
+  const likeCollection = db.collection('user-like');
+  const userCollection = db.collection('user');
+
+  // 检查书籍是否存在
+  const bookResult = await bookCollection.doc(bookId).get();
+  if (bookResult.data.length === 0) {
+    return Response.notFound('书籍不存在');
+  }
+
+  // 检查是否已点赞
+  const existLike = await likeCollection.where({
+    userId,
+    targetType: '书籍',
+    targetId: bookId
+  }).get();
+
+  if (existLike.data.length > 0) {
+    return Response.error('已经点赞过了');
+  }
+
+  // 开始事务操作
+  const transaction = await db.startTransaction();
+  
+  try {
+    // 添加点赞记录
+    await transaction.collection('user-like').add({
+      userId,
+      targetType: '书籍',
+      targetId: bookId,
+      likeTime: Date.now()
+    });
+
+    // 更新书籍点赞数
+    await transaction.collection('book-info').doc(bookId).update({
+      likeCount: $.inc(1),
+      updateTime: Date.now()
+    });
+
+    // 更新作者获赞数（如果有作者信息）
+    const book = bookResult.data[0];
+    if (book.authorId) {
+      await transaction.collection('user').doc(book.authorId).update({
+        likeCount: $.inc(1)
+      });
+    }
+
+    await transaction.commit();
+    
+    return Response.success(null, '点赞成功');
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
+}
+
+// 取消点赞
+async function cancelLikeBook(userId, data) {
+  const { bookId } = data;
+
+  if (!bookId) {
+    return Response.validationError('书籍ID不能为空');
+  }
+
+  const db = uniCloud.database();
+  const bookCollection = db.collection('book-info');
+  const likeCollection = db.collection('user-like');
+
+  // 查找点赞记录
+  const likeResult = await likeCollection.where({
+    userId,
+    targetType: '书籍',
+    targetId: bookId
+  }).get();
+
+  if (likeResult.data.length === 0) {
+    return Response.error('还未点赞');
+  }
+
+  // 开始事务操作
+  const transaction = await db.startTransaction();
+  
+  try {
+    // 删除点赞记录
+    await transaction.collection('user-like').doc(likeResult.data[0]._id).remove();
+
+    // 更新书籍点赞数
+    await transaction.collection('book-info').doc(bookId).update({
+      likeCount: $.inc(-1),
+      updateTime: Date.now()
+    });
+
+    await transaction.commit();
+    
+    return Response.success(null, '取消点赞成功');
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
+}
+
+// 添加书籍（管理员功能）
+async function addBook(data) {
+  const { title, author, cover, description, categoryId, level, totalChapters, totalDuration } = data;
+
+  // 验证必填字段
+  if (!title || !author || !cover || !categoryId) {
+    return Response.validationError('标题、作者、封面和分类为必填项');
+  }
+
+  const bookCollection = db.collection('book-info');
+
+  // 检查是否已存在相同标题的书籍
+  const existBook = await bookCollection.where({ title }).get();
+  if (existBook.data.length > 0) {
+    return Response.error('已存在相同标题的书籍');
+  }
+
+  // 创建书籍
+  const bookData = {
+    title,
+    author,
+    cover,
+    description: description || '',
+    categoryId,
+    level: level || '中级',
+    totalChapters: totalChapters || 0,
+    totalDuration: totalDuration || 0,
+    likeCount: 0,
+    commentCount: 0,
+    status: '完结',
+    popularity: 0,
+    createTime: Date.now(),
+    updateTime: Date.now()
+  };
+
+  const result = await bookCollection.add(bookData);
+
+  // 更新分类的书籍数量
+  const categoryCollection = db.collection('book-category');
+  await categoryCollection.doc(categoryId).update({
+    bookCount: $.inc(1),
+    updateTime: Date.now()
+  });
+
+  return Response.success({ bookId: result.id }, '书籍添加成功');
+}
+
+// 更新书籍（管理员功能）
+async function updateBook(data) {
+  const { bookId, ...updateData } = data;
+
+  if (!bookId) {
+    return Response.validationError('书籍ID不能为空');
+  }
+
+  const bookCollection = db.collection('book-info');
+  updateData.updateTime = Date.now();
+
+  await bookCollection.doc(bookId).update(updateData);
+
+  return Response.success(null, '书籍更新成功');
+}
+
+// 删除书籍（管理员功能）
+async function deleteBook(data) {
+  const { bookId } = data;
+
+  if (!bookId) {
+    return Response.validationError('书籍ID不能为空');
+  }
+
+  const bookCollection = db.collection('book-info');
+  const bookResult = await bookCollection.doc(bookId).get();
+
+  if (bookResult.data.length === 0) {
+    return Response.notFound('书籍不存在');
+  }
+
+  const book = bookResult.data[0];
+
+  // 开始事务操作
+  const db = uniCloud.database();
+  const transaction = await db.startTransaction();
+  
+  try {
+    // 删除书籍
+    await transaction.collection('book-info').doc(bookId).remove();
+
+    // 更新分类的书籍数量
+    await transaction.collection('book-category').doc(book.categoryId).update({
+      bookCount: $.inc(-1),
+      updateTime: Date.now()
+    });
+
+    // 删除相关章节（可选，根据业务需求）
+    // await transaction.collection('book-chapter').where({ bookId }).remove();
+
+    await transaction.commit();
+    
+    return Response.success(null, '书籍删除成功');
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
+}

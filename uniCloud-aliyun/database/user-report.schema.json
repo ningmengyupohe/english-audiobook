@@ -1,0 +1,22 @@
+{
+  "bsonType": "object",
+  "required": ["_id", "userId", "targetType", "targetId", "reportType"],
+  "properties": {
+    "_id": { "description": "举报记录ID" },
+    "userId": { "bsonType": "string", "label": "用户ID", "foreignKey": "user._id" },
+    "targetType": { "bsonType": "string", "label": "被举报对象类型", "enum": ["书籍", "章节", "用户", "评论"], "defaultValue": "评论" },
+    "targetId": { "bsonType": "string", "label": "被举报对象ID" },
+    "reportType": { "bsonType": "string", "label": "举报类型", "enum": ["违规内容", "侵权", "人身攻击", "其他"], "defaultValue": "违规内容" },
+    "description": { "bsonType": "string", "label": "举报描述", "maxLength": 500 },
+    "reportTime": { "bsonType": "timestamp", "label": "举报时间", "defaultValue": { "$env": "now" } },
+    "status": { "bsonType": "string", "label": "处理状态", "enum": ["待处理", "已处理", "驳回"], "defaultValue": "待处理" },
+    "processorId": { "bsonType": "string", "label": "处理人ID", "foreignKey": "user._id" },
+    "processTime": { "bsonType": "timestamp", "label": "处理时间" },
+    "processResult": { "bsonType": "string", "label": "处理结果说明", "maxLength": 500 }
+  },
+  "indexes": [
+    { "name": "targetType_1_targetId_1", "key": { "targetType": 1, "targetId": 1 } },
+    { "name": "userId_1_reportTime_-1", "key": { "userId": 1, "reportTime": -1 } },
+    { "name": "status_1", "key": { "status": 1 } }
+  ]
+}

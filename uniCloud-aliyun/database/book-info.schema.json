@@ -1,0 +1,223 @@
+{
+  "bsonType": "object",
+  "required": [
+    "_id",
+    "title",
+    "author",
+    "categoryId",
+    "status"
+  ],
+  "properties": {
+    "_id": {
+      "description": "书籍ID"
+    },
+    "title": {
+      "bsonType": "string",
+      "label": "书籍名称",
+      "maxLength": 100
+    },
+    "subtitle": {
+      "bsonType": "string",
+      "label": "副标题",
+      "maxLength": 200
+    },
+    "author": {
+      "bsonType": "string",
+      "label": "作者",
+      "maxLength": 50
+    },
+    "cover": {
+      "bsonType": "string",
+      "label": "封面地址"
+    },
+    "description": {
+      "bsonType": "string",
+      "label": "书籍简介"
+    },
+    "categoryId": {
+      "bsonType": "string",
+      "label": "分类ID",
+      "foreignKey": "book-category._id"
+    },
+    "level": {
+      "bsonType": "string",
+      "label": "难度等级",
+      "enum": [
+        "初级",
+        "中级",
+        "高级"
+      ],
+      "defaultValue": "中级"
+    },
+    "totalChapters": {
+      "bsonType": "int",
+      "label": "总章节数",
+      "minimum": 0,
+      "defaultValue": 0
+    },
+    "totalDuration": {
+      "bsonType": "int",
+      "label": "总时长(秒)",
+      "minimum": 0,
+      "defaultValue": 0
+    },
+    "likeCount": {
+      "bsonType": "int",
+      "label": "点赞数",
+      "minimum": 0,
+      "defaultValue": 0
+    },
+    "commentCount": {
+      "bsonType": "int",
+      "label": "评论数",
+      "minimum": 0,
+      "defaultValue": 0
+    },
+    "status": {
+      "bsonType": "string",
+      "label": "书籍状态",
+      "enum": [
+        "连载",
+        "完结"
+      ],
+      "defaultValue": "完结"
+    },
+    "popularity": {
+      "bsonType": "int",
+      "label": "热度值",
+      "minimum": 0,
+      "defaultValue": 0
+    },
+    // ============ 推荐相关字段 ============
+    "isRecommend": {
+      "bsonType": "bool",
+      "label": "是否推荐",
+      "defaultValue": false,
+      "description": "是否在推荐列表中显示"
+    },
+    "recommendType": {
+      "bsonType": "array",
+      "label": "推荐类型",
+      "description": "推荐标签类型",
+      "items": {
+        "bsonType": "string",
+        "enum": [
+          "editor_choice",    // 编辑精选
+          "new_release",      // 新书推荐
+          "hot_sale",         // 畅销热门
+          "classic",          // 经典必读
+          "category_top",     // 分类热门
+          "user_favorite",    // 用户收藏
+          "free_trial"        // 免费试读
+        ]
+      },
+      "defaultValue": []
+    },
+    "recommendWeight": {
+      "bsonType": "int",
+      "label": "推荐权重",
+      "minimum": 0,
+      "maximum": 100,
+      "defaultValue": 0,
+      "description": "推荐排序权重，数值越大排序越靠前"
+    },
+    "recommendReason": {
+      "bsonType": "string",
+      "label": "推荐理由",
+      "maxLength": 100,
+      "description": "编辑推荐的简短理由"
+    },
+    "recommendBadge": {
+      "bsonType": "string",
+      "label": "推荐角标",
+      "enum": [
+        "new",           // 新书
+        "hot",           // 热门
+        "best",          // 精选
+        "free",          // 免费
+        "limited",       // 限免
+        "discount"       // 优惠
+      ],
+      "description": "显示在封面上的角标类型"
+    },
+    "recommendOrder": {
+      "bsonType": "int",
+      "label": "推荐排序",
+      "minimum": 0,
+      "defaultValue": 9999,
+      "description": "在推荐列表中的具体排序位置"
+    },
+    // ============ 新增索引 ============
+    "createTime": {
+      "bsonType": "timestamp",
+      "label": "创建时间",
+      "defaultValue": {
+        "$env": "now"
+      }
+    },
+    "updateTime": {
+      "bsonType": "timestamp",
+      "label": "更新时间",
+      "defaultValue": {
+        "$env": "now"
+      }
+    }
+  },
+  "indexes": [
+    {
+      "name": "categoryId_1",
+      "key": {
+        "categoryId": 1
+      }
+    },
+    {
+      "name": "title_1",
+      "key": {
+        "title": 1
+      }
+    },
+    {
+      "name": "popularity_-1",
+      "key": {
+        "popularity": -1
+      }
+    },
+    {
+      "name": "level_1",
+      "key": {
+        "level": 1
+      }
+    },
+    // ============ 推荐相关索引 ============
+    {
+      "name": "isRecommend_1_popularity_-1",
+      "key": {
+        "isRecommend": 1,
+        "popularity": -1
+      },
+      "description": "推荐书籍按热度排序"
+    },
+    {
+      "name": "recommendWeight_-1",
+      "key": {
+        "recommendWeight": -1
+      },
+      "description": "按推荐权重降序"
+    },
+    {
+      "name": "recommendOrder_1",
+      "key": {
+        "recommendOrder": 1
+      },
+      "description": "按推荐排序升序"
+    },
+    {
+      "name": "isRecommend_1_recommendWeight_-1",
+      "key": {
+        "isRecommend": 1,
+        "recommendWeight": -1
+      },
+      "description": "推荐书籍按权重排序"
+    }
+  ]
+}
