@@ -1,0 +1,102 @@
+<view class="listening-container">
+  <!-- 顶部栏 -->
+  <view class="game-header">
+    <view class="back-btn" bindtap="goBack">←</view>
+    <text class="game-title">听力理解游戏</text>
+    <view class="score">得分: {{score}}</view>
+  </view>
+  
+  <!-- 游戏区域 -->
+  <view class="game-area">
+    <!-- 音频播放区域 -->
+    <view class="audio-player">
+      <view class="audio-card">
+        <text class="audio-title">第{{currentIndex}}题</text>
+        
+        <view class="audio-controls">
+          <view class="control-btn play-btn" bindtap="togglePlay">
+            <text wx:if="{{isPlaying}}">⏸</text>
+            <text wx:else>▶️</text>
+          </view>
+          
+          <view class="progress-bar">
+            <view class="progress-fill" style="width: {{audioProgress}}%;"></view>
+          </view>
+          
+          <text class="audio-time">{{formatTime(audioCurrentTime)}}/{{formatTime(audioDuration)}}</text>
+        </view>
+        
+        <view class="play-count">
+          <text>剩余播放次数: {{playCount}}</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 问题区域 -->
+    <view class="question-area">
+      <text class="question-text">{{currentQuestion.question}}</text>
+      
+      <!-- 选项 -->
+      <view class="options-container">
+        <view class="option-item" 
+              wx:for="{{currentQuestion.options}}" 
+              wx:key="index"
+              data-index="{{index}}"
+              bindtap="selectOption"
+              style="{{optionStyles[index]}}">
+          <text class="option-text">{{item}}</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 控制按钮 -->
+    <view class="control-buttons">
+      <view class="btn hint-btn" bindtap="showHint">
+        <text>提示</text>
+      </view>
+      <view class="btn submit-btn" bindtap="submitAnswer">
+        <text>提交答案</text>
+      </view>
+      <view class="btn next-btn" bindtap="nextQuestion">
+        <text>下一题</text>
+      </view>
+    </view>
+    
+    <!-- 进度条 -->
+    <view class="progress-section">
+      <view class="progress-bar">
+        <view class="progress-fill" style="width: {{(currentIndex/totalQuestions)*100}}%;"></view>
+      </view>
+      <text class="progress-text">{{currentIndex}}/{{totalQuestions}}</text>
+    </view>
+  </view>
+  
+  <!-- 结果弹窗 -->
+  <view class="result-modal" wx:if="{{showResult}}">
+    <view class="modal-content">
+      <text class="result-icon">{{resultIcon}}</text>
+      <text class="result-title">{{resultTitle}}</text>
+      <text class="result-desc">{{resultDescription}}</text>
+      
+      <view class="result-buttons">
+        <view class="result-btn next-btn" bindtap="nextQuestion">
+          <text>下一题</text>
+        </view>
+        <view class="result-btn back-btn" bindtap="backToPlayer">
+          <text>返回播放器</text>
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 提示弹窗 -->
+  <view class="hint-modal" wx:if="{{showHintModal}}">
+    <view class="hint-content">
+      <text class="hint-title">💡 提示</text>
+      <text class="hint-text">{{currentQuestion.hint}}</text>
+      <view class="hint-close" bindtap="closeHint">
+        <text>我知道了</text>
+      </view>
+    </view>
+  </view>
+</view>

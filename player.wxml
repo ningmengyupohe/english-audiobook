@@ -1,0 +1,217 @@
+<view class="player-container">
+  <!-- 顶部背景 -->
+  <view class="header-bg"></view>
+  
+  <!-- 返回按钮 -->
+  <view class="back-button" bindtap="goBack">
+    <text class="back-icon">←</text>
+  </view>
+  
+  <!-- 歌曲封面区域 -->
+  <view class="cover-section">
+    <image src="{{currentBook.cover || '/images/covers/default.jpg'}}" class="{{albumCoverClass || 'album-cover'}}" />
+    <view class="disc-shadow"></view>
+  </view>
+  
+  <!-- 歌曲信息 -->
+  <view class="song-info">
+    <text class="song-title">{{currentBook.title || '歌曲标题'}}</text>
+    <text class="song-artist">{{currentBook.author || '作者'}}</text>
+    <text class="song-album">专辑: {{currentBook.category || '英语听书'}}</text>
+  </view>
+  
+  <!-- 优化后的进度条区域 -->
+  <view class="progress-section">
+    <!-- 时间显示 -->
+    <view class="time-display">
+      <text class="time-current">{{formatTime(currentTime)}}</text>
+      <view class="time-divider">/</view>
+      <text class="time-total">{{formatTime(totalTime)}}</text>
+    </view>
+    
+    <!-- 进度条容器 -->
+    <view class="progress-container">
+      <!-- 背景轨道 -->
+      <view class="progress-track-bg"></view>
+      
+      <!-- 缓冲进度（可选） -->
+      <view class="progress-buffered" style="width: 85%;"></view>
+      
+      <!-- 已播放进度 -->
+      <view class="progress-played {{isSeekingActive ? 'is-seeking' : ''}} {{!isPlaying ? 'is-paused' : ''}}" style="width: {{progress}}%;">
+        <view class="progress-played-fill">
+          <view class="progress-gradient"></view>
+        </view>
+        <!-- 播放头 -->
+        <view class="progress-knob" 
+              bindtouchstart="onProgressTouchStart" 
+              bindtouchmove="onProgressTouchMove" 
+              bindtouchend="onProgressTouchEnd">
+          <view class="knob-core"></view>
+          <view class="knob-glow"></view>
+        </view>
+      </view>
+      
+      <!-- 点击区域 -->
+      <view class="progress-touch-area" bindtap="seekProgress"></view>
+    </view>
+    
+    <!-- 进度信息 -->
+    <view class="progress-info">
+      <text class="progress-text">{{progress.toFixed(0)}}% 播放</text>
+      <text class="chapter-text">第 {{currentChapterIndex + 1}}/{{chapters.length}} 章</text>
+    </view>
+  </view>
+  
+  <!-- 播放控制 -->
+  <view class="player-controls">
+    <!-- 播放模式 -->
+    <view class="control-item" bindtap="togglePlayMode">
+      <view class="control-icon">
+        <text class="mode-icon" wx:if="{{playMode === 'order'}}">🔁</text>
+        <text class="mode-icon" wx:elif="{{playMode === 'loop'}}">🔂</text>
+        <text class="mode-icon" wx:elif="{{playMode === 'random'}}">🔀</text>
+      </view>
+      <text class="control-text">模式</text>
+    </view>
+    
+    <!-- 上一首 -->
+    <view class="control-item" bindtap="prevTrack">
+      <view class="control-icon">⏮</view>
+      <text class="control-text">上一首</text>
+    </view>
+    
+    <!-- 播放/暂停 -->
+    <view class="control-item play-pause" bindtap="togglePlay">
+      <view class="play-icon-container">
+        <text class="play-icon" wx:if="{{isPlaying}}">⏸</text>
+        <text class="play-icon" wx:else>▶️</text>
+      </view>
+    </view>
+    
+    <!-- 下一首 -->
+    <view class="control-item" bindtap="nextTrack">
+      <view class="control-icon">⏭</view>
+      <text class="control-text">下一首</text>
+    </view>
+    
+    <!-- 结束学习 -->
+    <view class="control-item" bindtap="endStudy">
+      <view class="control-icon">🏁</view>
+      <text class="control-text">结束学习</text>
+    </view>
+  </view>
+  
+  <!-- 音量控制 -->
+  <view class="volume-section" wx:if="{{showVolume}}">
+    <view class="volume-icon">🔊</view>
+    <view class="volume-bar">
+      <view class="volume-track"></view>
+      <view class="volume-fill" style="width: {{volume * 100}}%;"></view>
+      <view class="volume-dot" style="left: {{volume * 100}}%;" 
+            bindtouchstart="onVolumeTouchStart" 
+            bindtouchmove="onVolumeTouchMove" 
+            bindtouchend="onVolumeTouchEnd"></view>
+    </view>
+  </view>
+  
+  <!-- 功能按钮 -->
+  <view class="action-buttons">
+    <view class="action-item" bindtap="toggleFavorite">
+      <view class="action-icon {{isFavorite ? 'favorite-active' : ''}}">
+        <text wx:if="{{isFavorite}}">❤️</text>
+        <text wx:else>🤍</text>
+      </view>
+      <text class="action-text">收藏</text>
+    </view>
+    
+    <view class="action-item" bindtap="toggleDownload">
+      <view class="action-icon {{isDownloaded ? 'download-active' : ''}}">
+        <text wx:if="{{isDownloaded}}">📥</text>
+        <text wx:else>⬇️</text>
+      </view>
+      <text class="action-text">下载</text>
+    </view>
+    
+    <view class="action-item" bindtap="toggleSpeed">
+      <view class="action-icon">⚡</view>
+      <text class="action-text">{{playbackSpeed}}x</text>
+    </view>
+    
+    <view class="action-item" bindtap="toggleVolume">
+      <view class="action-icon">🔊</view>
+      <text class="action-text">音量</text>
+    </view>
+  </view>
+  
+  <!-- 章节列表 -->
+  <view class="chapter-section">
+    <view class="section-header">
+      <text class="section-title">📖 章节列表</text>
+      <text class="section-count">{{chapters.length}} 章节</text>
+    </view>
+    <scroll-view class="chapter-list" scroll-y="true">
+      <view class="chapter-item" 
+            wx:for="{{chapters}}" 
+            wx:key="id"
+            data-index="{{index}}"
+            bindtap="playChapter">
+        <view class="chapter-info">
+          <text class="chapter-title">{{item.title}}</text>
+          <text class="chapter-duration">{{formatTime(item.duration || 0)}}</text>
+        </view>
+        <view class="chapter-status">
+          <text class="status-icon" wx:if="{{currentChapterIndex === index}}">🎧</text>
+          <text class="status-text" wx:if="{{currentChapterIndex === index}}">播放中</text>
+          <text class="status-text" wx:elif="{{item.isCompleted}}">已完成</text>
+          <text class="status-text" wx:else>未播放</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+  
+  <!-- 学习统计 -->
+  <view class="study-stats" bindtap="showStudyReport">
+    <view class="stats-card">
+      <view class="stats-header">
+        <text class="stats-title">📊 本次学习</text>
+        <text class="stats-time">{{formatTime(studyDuration * 60)}}</text>
+      </view>
+      <view class="stats-content">
+        <view class="stat-item">
+          <text class="stat-icon">⏰</text>
+          <text class="stat-value">{{studyDuration}}</text>
+          <text class="stat-label">分钟</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-icon">📖</text>
+          <text class="stat-value">{{completedChapters}}</text>
+          <text class="stat-label">章节</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-icon">🎯</text>
+          <text class="stat-value">{{learningProgress}}%</text>
+          <text class="stat-label">进度</text>
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 歌词显示区域 -->
+  <view class="lyrics-section" wx:if="{{showLyrics}}">
+    <view class="lyrics-header">
+      <text class="lyrics-title">🎵 歌词</text>
+      <text class="lyrics-close" bindtap="toggleLyrics">关闭</text>
+    </view>
+    <scroll-view class="lyrics-container" scroll-y="true" scroll-into-view="{{currentLyricId}}">
+      <view class="lyrics-line" 
+            wx:for="{{lyrics}}" 
+            wx:key="time"
+            id="lyric-{{index}}"
+            data-time="{{item.time}}"
+            bindtap="seekToLyric">
+        <text class="lyric-text {{currentLyricIndex === index ? 'active' : ''}}">{{item.text}}</text>
+      </view>
+    </scroll-view>
+  </view>
+</view>

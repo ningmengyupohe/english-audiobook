@@ -1,0 +1,255 @@
+<!-- 导航栏 -->
+<view class="nav-bar">
+  <view class="nav-back" bindtap="goBack">
+    <text class="nav-icon">⬅️</text>
+  </view>
+  <text class="nav-title {{headerTitleVisible ? 'visible' : ''}}">{{bookInfo.title}}</text>
+  <view class="nav-actions">
+    <text class="nav-action-icon" bindtap="toggleFavorite">❤️</text>
+  </view>
+</view>
+
+<scroll-view 
+  class="detail-container" 
+  scroll-y 
+  bindscroll="onPageScroll"
+  scroll-into-view="{{scrollIntoId}}"
+>
+  <!-- 书籍封面区域 -->
+  <view class="cover-section">
+    <view class="cover-wrapper">
+      <image src="{{bookInfo.cover}}" class="book-cover"></image>
+      <view class="cover-badge">
+        <text class="badge-text">{{bookInfo.difficultyText}}</text>
+      </view>
+    </view>
+    
+    <!-- 书籍标题和信息 -->
+    <view class="title-section">
+      <text class="book-title">{{bookInfo.title}}</text>
+      <text class="book-author">👤 {{bookInfo.author}}</text>
+      
+      <!-- 评分 -->
+      <view class="rating-section">
+        <view class="stars">
+          <text class="star-icon">⭐</text>
+          <text class="star-icon">⭐</text>
+          <text class="star-icon">⭐</text>
+          <text class="star-icon">⭐</text>
+          <text class="star-icon {{bookInfo.rating >= 4.5 ? '' : 'half'}}">⭐</text>
+        </view>
+        <text class="rating-text">{{bookInfo.rating}}分 · {{bookInfo.ratingCount}}人评分</text>
+      </view>
+      
+      <!-- 数据统计 -->
+      <view class="stats-section">
+        <view class="stat-item">
+          <text class="stat-icon">🎵</text>
+          <text class="stat-text">{{bookInfo.duration}}分钟</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-icon">👁️</text>
+          <text class="stat-text">{{bookInfo.playCount}}次播放</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-icon">📖</text>
+          <text class="stat-text">{{bookInfo.chapterCount}}章节</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 标签区域 -->
+  <view class="tags-section">
+    <block wx:for="{{bookInfo.tags}}" wx:key="index">
+      <view class="tag-item">{{item}}</view>
+    </block>
+  </view>
+
+  <!-- 主要操作按钮 -->
+  <view class="action-section">
+    <view class="action-buttons">
+      <view class="action-btn play-btn" bindtap="goToPlayer">
+        <text class="action-icon">▶️</text>
+        <text class="action-text">播放全部</text>
+      </view>
+      <view class="action-btn download-btn" bindtap="toggleDownload">
+        <text class="action-icon">{{bookInfo.isDownloaded ? '📂' : '⬇️'}}</text>
+        <text class="action-text">{{bookInfo.isDownloaded ? '已下载' : '下载'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 播放进度 -->
+  <view class="progress-section" wx:if="{{playProgress > 0}}">
+    <view class="progress-header">
+      <text class="progress-title">继续播放</text>
+      <text class="progress-percent">{{playProgress}}%</text>
+    </view>
+    <view class="progress-bar">
+      <view class="progress-fill" style="width: {{playProgress}}%;"></view>
+    </view>
+    <view class="progress-action">
+      <text class="continue-btn" bindtap="continuePlaying">继续播放</text>
+    </view>
+  </view>
+
+  <!-- 内容简介 -->
+  <view class="description-section">
+    <view class="section-header">
+      <text class="section-title">📝 内容简介</text>
+    </view>
+    <view class="description-content {{expandedDescription ? 'expanded' : ''}}">
+      <text class="description-text">{{bookInfo.description}}</text>
+    </view>
+    <view class="expand-btn" bindtap="toggleDescription">
+      <text class="expand-text">{{expandedDescription ? '收起' : '展开全部'}}</text>
+    </view>
+  </view>
+
+  <!-- 章节列表 -->
+  <view class="chapters-section">
+    <view class="section-header">
+      <text class="section-title">📚 章节列表</text>
+      <text class="section-more" bindtap="showAllChapters">查看全部({{chapters.length}})</text>
+    </view>
+    <view class="chapters-list">
+      <block wx:for="{{chapters.slice(0, showAllChapters ? chapters.length : 5)}}" wx:key="id">
+        <view class="chapter-item" data-index="{{index}}" bindtap="playChapter">
+          <view class="chapter-info">
+            <text class="chapter-number">第{{index + 1}}章</text>
+            <text class="chapter-title">{{item.title}}</text>
+          </view>
+          <view class="chapter-actions">
+            <text class="chapter-duration">{{formatTime(item.duration)}}</text>
+            <text class="chapter-status {{item.isCompleted ? 'completed' : ''}}">
+              {{item.isCompleted ? '✅ 已听完' : '▶️ 播放'}}
+            </text>
+          </view>
+        </view>
+      </block>
+    </view>
+    <view class="view-all-btn" wx:if="{{!showAllChapters && chapters.length > 5}}" bindtap="toggleShowAllChapters">
+      <text class="view-all-text">查看更多章节</text>
+    </view>
+  </view>
+
+  <!-- 学习要点 -->
+  <view class="learning-section">
+    <view class="section-header">
+      <text class="section-title">🎯 学习要点</text>
+    </view>
+    <view class="learning-points">
+      <view class="learning-item">
+        <text class="learning-icon">📝</text>
+        <view class="learning-content">
+          <text class="learning-title">重点词汇</text>
+          <text class="learning-value">{{bookInfo.vocabularyCount}}个</text>
+        </view>
+      </view>
+      <view class="learning-item">
+        <text class="learning-icon">✨</text>
+        <view class="learning-content">
+          <text class="learning-title">语法要点</text>
+          <text class="learning-value">{{bookInfo.grammarPoints}}个</text>
+        </view>
+      </view>
+      <view class="learning-item">
+        <text class="learning-icon">🎯</text>
+        <view class="learning-content">
+          <text class="learning-title">适合水平</text>
+          <text class="learning-value">{{bookInfo.difficultyText}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 相似推荐 -->
+  <view class="similar-section">
+    <view class="section-header">
+      <text class="section-title">📚 相似推荐</text>
+    </view>
+    <scroll-view class="similar-list" scroll-x>
+      <view class="similar-items">
+        <block wx:for="{{similarBooks}}" wx:key="id">
+          <view class="similar-item" data-id="{{item.id}}" bindtap="goToSimilarBook">
+            <image src="{{item.cover}}" class="similar-cover"></image>
+            <view class="similar-info">
+              <text class="similar-title">{{item.title}}</text>
+              <text class="similar-author">{{item.author}}</text>
+            </view>
+          </view>
+        </block>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 用户评论 -->
+  <view class="comments-section">
+    <view class="section-header">
+      <text class="section-title">💬 用户评论 ({{commentCount}})</text>
+      <text class="section-more" bindtap="goToComments">查看全部</text>
+    </view>
+    <view class="comments-list">
+      <block wx:for="{{comments}}" wx:key="id">
+        <view class="comment-item">
+          <image src="{{item.avatar}}" class="comment-avatar"></image>
+          <view class="comment-content">
+            <view class="comment-header">
+              <text class="comment-username">{{item.username}}</text>
+              <view class="comment-rating">
+                <block wx:for="{{5}}" wx:key="index">
+                  <text class="comment-star {{index < item.rating ? 'active' : ''}}">⭐</text>
+                </block>
+              </view>
+            </view>
+            <text class="comment-text">{{item.content}}</text>
+            <text class="comment-time">{{formatCommentTime(item.time)}}</text>
+          </view>
+        </view>
+      </block>
+    </view>
+    <view class="add-comment-btn" bindtap="addComment">
+      <text class="add-comment-text">📝 写评论</text>
+    </view>
+  </view>
+
+  <!-- 底部空白 -->
+  <view class="bottom-space"></view>
+</scroll-view>
+
+<!-- 底部操作栏 -->
+<view class="bottom-bar {{showBottomBar ? 'visible' : ''}}">
+  <view class="bottom-action-btn favorite-btn" bindtap="toggleFavorite">
+    <text class="bottom-icon">{{bookInfo.isFavorite ? '❤️' : '🤍'}}</text>
+    <text class="bottom-text">{{bookInfo.isFavorite ? '已收藏' : '收藏'}}</text>
+  </view>
+  <view class="bottom-action-btn download-btn" bindtap="toggleDownload">
+    <text class="bottom-icon">{{bookInfo.isDownloaded ? '📂' : '⬇️'}}</text>
+    <text class="bottom-text">{{bookInfo.isDownloaded ? '已下载' : '下载'}}</text>
+  </view>
+  <view class="main-action-btn" bindtap="goToPlayer">
+    <text class="main-icon">▶️</text>
+    <text class="main-text">播放</text>
+  </view>
+</view>
+
+<!-- 分享弹窗 -->
+<view class="share-modal" wx:if="{{showSharePanel}}">
+  <view class="modal-mask" bindtap="hideSharePanel"></view>
+  <view class="modal-content">
+    <view class="modal-header">
+      <text class="modal-title">分享给好友</text>
+    </view>
+    <view class="share-options">
+      <view class="share-option" bindtap="shareToFriend">
+        <text class="share-icon">👥</text>
+        <text class="share-text">分享给朋友</text>
+      </view>
+      <view class="share-option" bindtap="copyLink">
+        <text class="share-icon">📋</text>
+        <text class="share-text">复制链接</text>
+      </view>
+    </view>
+  </view>
+</view>

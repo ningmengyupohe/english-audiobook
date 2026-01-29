@@ -1,0 +1,174 @@
+<!-- pages/register/register.wxml -->
+<view class="register-page">
+  <!-- 导航栏 -->
+  <view class="nav-bar">
+    <view class="nav-back" bindtap="goBack">
+      <text class="nav-icon">⬅️</text>
+    </view>
+    <text class="nav-title">用户注册</text>
+    <view style="width: 60rpx"></view>
+  </view>
+
+  <view class="container">
+    <!-- 欢迎区域 -->
+    <view class="welcome-section">
+      <text class="welcome-title">创建账号</text>
+      <text class="welcome-subtitle">简单注册，开启学习之旅</text>
+    </view>
+
+    <!-- 注册表单 -->
+    <form bindsubmit="onRegisterSubmit" class="register-form">
+      <!-- 手机号输入 -->
+      <view class="form-item">
+        <view class="form-label">
+          <text class="form-icon">📱</text>
+          <text>手机号 *</text>
+        </view>
+        <input 
+          type="number" 
+          name="phone" 
+          value="{{formData.phone}}" 
+          placeholder="请输入手机号" 
+          maxlength="11"
+          bindinput="onPhoneInput"
+          class="form-input"
+          placeholder-class="placeholder"
+        />
+        <view class="form-tips" wx:if="{{!phoneValid && formData.phone}}">
+          <text class="tips-text">请输入有效的手机号</text>
+        </view>
+      </view>
+
+      <!-- 用户名输入 -->
+      <view class="form-item">
+        <view class="form-label">
+          <text class="form-icon">👤</text>
+          <text>用户名 *</text>
+        </view>
+        <input 
+          type="text" 
+          name="username" 
+          value="{{formData.username}}" 
+          placeholder="请输入2-20位用户名" 
+          maxlength="20"
+          bindinput="onUsernameInput"
+          class="form-input"
+          placeholder-class="placeholder"
+        />
+        <view class="form-tips" wx:if="{{!usernameValid && formData.username}}">
+          <text class="tips-text">用户名需2-20位字符</text>
+        </view>
+      </view>
+
+      <!-- 邮箱输入（可选） -->
+      <view class="form-item">
+        <view class="form-label">
+          <text class="form-icon">📧</text>
+          <text>邮箱（可选）</text>
+        </view>
+        <input 
+          type="text" 
+          name="email" 
+          value="{{formData.email}}" 
+          placeholder="请输入邮箱地址" 
+          bindinput="onEmailInput"
+          class="form-input"
+          placeholder-class="placeholder"
+        />
+        <view class="form-tips" wx:if="{{!emailValid && formData.email}}">
+          <text class="tips-text">请输入有效的邮箱地址</text>
+        </view>
+      </view>
+
+      <!-- 密码输入 -->
+      <view class="form-item">
+        <view class="form-label">
+          <text class="form-icon">🔒</text>
+          <text>设置密码 *</text>
+        </view>
+        <view class="password-input-container">
+          <input 
+            password="{{!passwordVisible}}"
+            type="text"
+            name="password" 
+            value="{{formData.password}}"
+            placeholder="请输入6-20位密码" 
+            maxlength="20"
+            bindinput="onPasswordInput"
+            class="form-input password-input"
+            placeholder-class="placeholder"
+          />
+          <view class="eye-icon-container" bindtap="togglePasswordVisible">
+            <text class="eye-icon">{{passwordVisible ? '👁️' : '👁️‍🗨️'}}</text>
+          </view>
+        </view>
+        <view class="form-tips" wx:if="{{!passwordValid && formData.password}}">
+          <text class="tips-text">密码需6-20位字符</text>
+        </view>
+      </view>
+
+      <!-- 确认密码 -->
+      <view class="form-item">
+        <view class="form-label">
+          <text class="form-icon">🔒</text>
+          <text>确认密码 *</text>
+        </view>
+        <view class="password-input-container">
+          <input 
+            password="{{!confirmPasswordVisible}}"
+            type="text"
+            name="confirmPassword" 
+            value="{{formData.confirmPassword}}"
+            placeholder="请再次输入密码" 
+            maxlength="20"
+            bindinput="onConfirmPasswordInput"
+            class="form-input password-input"
+            placeholder-class="placeholder"
+          />
+          <view class="eye-icon-container" bindtap="toggleConfirmPasswordVisible">
+            <text class="eye-icon">{{confirmPasswordVisible ? '👁️' : '👁️‍🗨️'}}</text>
+          </view>
+        </view>
+        <view class="form-tips" wx:if="{{!passwordMatch && formData.confirmPassword}}">
+          <text class="tips-text">两次输入的密码不一致</text>
+        </view>
+      </view>
+
+      <!-- 用户协议 -->
+      <view class="agreement-section">
+        <view class="agreement-checkbox" bindtap="toggleAgreement">
+          <view class="checkbox-icon-container">
+            <text class="checkbox-icon">
+              {{agreementAccepted ? '✓' : ''}}
+            </text>
+          </view>
+          <text class="checkbox-text">我已阅读并同意</text>
+          <text class="agreement-link" bindtap="goToUserAgreement">《用户协议》</text>
+          <text class="agreement-link" bindtap="goToPrivacyPolicy">《隐私政策》</text>
+        </view>
+      </view>
+
+      <!-- 注册按钮 -->
+      <button 
+        type="submit" 
+        form-type="submit" 
+        class="register-btn {{canRegister && !isRegistering ? 'active' : 'disabled'}}"
+        disabled="{{!canRegister || isRegistering}}"
+        hover-class="btn-hover"
+      >
+        {{isRegistering ? '注册中...' : '立即注册'}}
+      </button>
+    </form>
+
+    <!-- 已有账号 -->
+    <view class="login-section">
+      <text class="login-text">已有账号？</text>
+      <text class="login-link" bindtap="goToLogin">立即登录</text>
+    </view>
+
+    <!-- 底部装饰 -->
+    <view class="bottom-decoration">
+      <text class="decoration-text">🎓 开启英语学习之旅</text>
+    </view>
+  </view>
+</view>

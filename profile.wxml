@@ -1,0 +1,231 @@
+<!-- pages/profile/profile.wxml -->
+<view class="profile-container">
+  <!-- 顶部渐变背景 -->
+  <view class="header-bg"></view>
+  
+  <!-- 用户信息卡片 -->
+  <view class="user-card" bindtap="onUserCardTap">
+    <view class="user-avatar-container">
+      <image src="{{userInfo.avatar || '/images/avatar/default.png'}}" class="user-avatar" bindtap="onAvatarTap" />
+      <view class="vip-badge" wx:if="{{userInfo.isVip}}">VIP</view>
+    </view>
+    <view class="user-info">
+      <text class="user-name">{{userInfo.nickname || '未登录'}}</text>
+      <text class="user-id">ID: {{userInfo.userId || '点击登录'}}</text>
+      <view class="user-tags">
+        <text class="user-tag" wx:if="{{userInfo.learningDays > 0}}">
+          📚 学习 {{userInfo.learningDays}} 天
+        </text>
+        <text class="user-tag vip-tag" wx:if="{{userInfo.isVip}}">
+          ⭐ VIP会员
+        </text>
+        <text class="user-tag level-tag" wx:if="{{userInfo.level && userInfo.level !== '未登录'}}"  >
+              🏆 {{userInfo.level}}
+        </text>
+      </view>
+    </view>
+    <image src="/images/icons/arrow-right-blue.png" class="arrow-icon" />
+  </view>
+  
+  <!-- 登录过期提示 -->
+  <view class="login-expired-tip" wx:if="{{loginExpired && !showExpiredModal}}">
+    <text>⚠️ 登录已过期，请重新登录</text>
+    <text class="re-login-btn" bindtap="goToLogin">重新登录</text>
+  </view>
+  
+
+  
+  <!-- 学习数据统计 -->
+  <view class="stats-section" wx:if="{{hasUserInfo && !loginExpired}}">
+    <view class="section-header">
+      <text class="section-title">📊 学习统计</text>
+      <text class="refresh-btn" bindtap="onRefreshTap" wx:if="{{!isRefreshing}}" style="position: relative; left: 547rpx; top: -71rpx">🔄 刷新</text>
+      <text class="refresh-btn refreshing" wx:if="{{isRefreshing}}">刷新中...</text>
+    </view>
+    <view class="stats-grid">
+      <view class="stats-item" style="position: relative; left: 0rpx; top: -31rpx">
+        <view class="stats-icon">⏰</view>
+        <text class="stats-value">{{studyData.totalMinutes || 0}}</text>
+        <text class="stats-label">学习时长(分钟)</text>
+      </view>
+      <view class="stats-item" style="position: relative; left: 0rpx; top: -31rpx">
+        <view class="stats-icon">📖</view>
+        <text class="stats-value">{{studyData.booksCount || 0}}</text>
+        <text class="stats-label">已听书籍</text>
+      </view>
+      <view class="stats-item" style="position: relative; left: 0rpx; top: -27rpx">
+        <view class="stats-icon">🔥</view>
+        <text class="stats-value">{{studyData.daysCount || 0}}</text>
+        <text class="stats-label">坚持天数</text>
+      </view>
+      <view class="stats-item" style="position: relative; left: 0rpx; top: -27rpx">
+        <view class="stats-icon">📝</view>
+        <text class="stats-value">{{studyData.wordsCount || 0}}</text>
+        <text class="stats-label">累计词汇</text>
+      </view>
+    </view>
+    
+    <!-- 每日目标进度 -->
+    <view class="goal-progress" wx:if="{{studyData.dailyGoal > 0}}" style="position: relative; left: 0rpx; top: -27rpx">
+      <view class="progress-header">
+        <text>每日目标</text>
+        <text>{{studyData.goalProgress || 0}}%</text>
+      </view>
+      <view class="progress-bar">
+        <view class="progress-fill" style="width: {{studyData.goalProgress || 0}}'%'"></view>
+      </view>
+      <text class="progress-text">
+        已完成 {{Math.floor((studyData.dailyGoal || 30) * (studyData.goalProgress || 0) / 100)}} / {{studyData.dailyGoal || 30}} 分钟
+      </text>
+    </view>
+  </view>
+  
+  <!-- 未登录提示 -->
+  <view class="empty-tips" wx:if="{{!hasUserInfo && !isLoading}}" style="height: 437rpx; display: flex; box-sizing: border-box; left: 4rpx; top: 12rpx; position: relative; width: 693rpx">
+    <image src="/images/empty/login-empty.png" class="empty-img" />
+    <text class="empty-text" style="position: relative; left: 14rpx; top: -136rpx">登录后查看学习数据</text>
+    <text class="empty-btn" bindtap="goToLogin" style="position: relative; left: -1rpx; top: -109rpx">立即登录</text>
+  </view>
+  
+  <!-- 功能菜单区 -->
+  <view class="menu-section">
+    <view class="section-title">
+      <text class="title-text">📚 我的内容</text>
+      <text class="menu-total">共 {{bookStats.total || 0}} 本</text>
+    </view>
+    
+    <!-- 已完成功能行 -->
+    <view class="menu-item large" bindtap="goToMyBooks" data-type="completed">
+      <view class="menu-icon">✅</view>
+      <view class="menu-content">
+        <text class="menu-text">已完成</text>
+        <text class="menu-desc">已经听完的书籍</text>
+      </view>
+      <view class="menu-right">
+        <text class="menu-count">{{bookStats.completed || 0}} 本</text>
+        <image src="/images/icons/arrow-right-blue.png" class="menu-arrow" />
+      </view>
+    </view>
+    
+    <!-- 已下载功能行 -->
+    <view class="menu-item large" bindtap="goToMyBooks" data-type="downloaded">
+      <view class="menu-icon">⬇️</view>
+      <view class="menu-content">
+        <text class="menu-text">已下载</text>
+        <text class="menu-desc">离线可听的书籍</text>
+      </view>
+      <view class="menu-right">
+        <text class="menu-count">{{bookStats.downloaded || 0}} 本</text>
+        <image src="/images/icons/arrow-right-blue.png" class="menu-arrow" />
+      </view>
+    </view>
+    
+
+    
+    <!-- 我的收藏功能行 -->
+    <view class="menu-item large" bindtap="goToMyBooks" data-type="favorites">
+      <view class="menu-icon">❤️</view>
+      <view class="menu-content">
+        <text class="menu-text">我的收藏</text>
+        <text class="menu-desc">标记为喜欢的书籍</text>
+      </view>
+      <view class="menu-right">
+        <text class="menu-count">{{bookStats.favorites || 0}} 本</text>
+        <image src="/images/icons/arrow-right-blue.png" class="menu-arrow" />
+      </view>
+    </view>
+    
+    <view class="menu-divider"></view>
+    
+    <!-- 设置功能区域 -->
+    <view class="section-title" style="margin-top: 40rpx;">
+      <text class="title-text">⚙️ 设置与帮助</text>
+    </view>
+    
+    <view class="menu-item" bindtap="goToHelpCenter">
+      <view class="menu-icon">❓</view>
+      <text class="menu-text">帮助中心</text>
+      <image src="/images/icons/arrow-right-blue.png" class="menu-arrow" />
+    </view>
+    
+    <view class="menu-item" bindtap="goToFeedback">
+      <view class="menu-icon">📝</view>
+      <text class="menu-text">意见反馈</text>
+      <image src="/images/icons/arrow-right-blue.png" class="menu-arrow" />
+    </view>
+    
+    <view class="menu-item" bindtap="goToSettings">
+      <view class="menu-icon">⚙️</view>
+      <text class="menu-text">系统设置</text>
+      <image src="/images/icons/arrow-right-blue.png" class="menu-arrow" />
+    </view>
+    
+    <view class="menu-item" bindtap="goToAbout">
+      <view class="menu-icon">ℹ️</view>
+      <text class="menu-text">关于我们</text>
+      <image src="/images/icons/arrow-right-blue.png" class="menu-arrow" />
+    </view>
+    
+    <!-- 调试功能（仅开发环境显示） -->
+    <view class="menu-item debug-item" bindtap="clearAllStorage" wx:if="{{debugMode}}">
+      <view class="menu-icon">🗑️</view>
+      <text class="menu-text">清除所有数据</text>
+    </view>
+    
+    <view class="menu-divider"></view>
+    
+    <!-- 登录/退出按钮 -->
+    <view class="menu-item logout-item" bindtap="logout" wx:if="{{hasUserInfo && !loginExpired}}">
+      <view class="menu-icon">🚪</view>
+      <text class="menu-text">退出登录</text>
+    </view>
+    
+    <view class="menu-item login-item" bindtap="goToLogin" wx:if="{{!hasUserInfo || loginExpired}}">
+      <view class="menu-icon">🔑</view>
+      <text class="menu-text">登录 / 注册</text>
+      <image src="/images/icons/arrow-right-blue.png" class="menu-arrow" />
+    </view>
+  </view>
+  
+  <!-- 版本信息 -->
+  <view class="version-info">
+    <text>英语听书 v{{version}}</text>
+    <text class="copyright">© 2023 英语听书 All Rights Reserved</text>
+  </view>
+  
+  <!-- 登录过期弹窗 -->
+  <view class="modal-mask" wx:if="{{showExpiredModal}}" bindtap="closeExpiredModal">
+    <view class="modal-container" catchtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">⚠️ 登录已过期</text>
+      </view>
+      <view class="modal-content">
+        <text>您的登录状态已过期，请重新登录</text>
+      </view>
+      <view class="modal-footer">
+        <button class="modal-btn cancel-btn" bindtap="closeExpiredModal">稍后再说</button>
+        <button class="modal-btn confirm-btn" bindtap="goToLoginFromModal">立即登录</button>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 加载弹窗 -->
+<view class="modal-mask loading-mask" wx:if="{{isLoading}}" catchtap="stopPropagation">
+  <view class="loading-modal" catchtap="stopPropagation">
+    <view class="loading-content">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+  </view>
+</view>
+
+<!-- 刷新弹窗 -->
+<view class="modal-mask loading-mask" wx:if="{{isRefreshing}}" catchtap="stopPropagation">
+  <view class="loading-modal" catchtap="stopPropagation">
+    <view class="loading-content">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">刷新中...</text>
+    </view>
+  </view>
+</view>

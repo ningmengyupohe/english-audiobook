@@ -1,0 +1,144 @@
+<view class="bookshelf-container">
+  <!-- 头部 -->
+  <view class="bookshelf-header">
+    <text class="header-title">我的书架</text>
+    <view class="header-actions">
+      <image src="/images/icons/search.png" class="header-icon" bindtap="goToSearch" />
+      <image src="/images/icons/edit.png" class="header-icon" bindtap="toggleEditMode" />
+    </view>
+  </view>
+  
+  <!-- 选项卡 -->
+  <view class="tabs">
+    <view 
+      class="tab-item {{activeTab === 'collection' ? 'active' : ''}}" 
+      bindtap="switchTab" 
+      data-tab="collection"
+    >
+      <text>收藏</text>
+      <view class="tab-indicator"></view>
+    </view>
+    <view 
+      class="tab-item {{activeTab === 'history' ? 'active' : ''}}" 
+      bindtap="switchTab" 
+      data-tab="history"
+    >
+      <text>历史</text>
+      <view class="tab-indicator"></view>
+    </view>
+  </view>
+  
+  <!-- 编辑模式 -->
+  <view class="edit-bar" wx:if="{{isEditMode}}">
+    <view class="edit-info">
+      <text class="edit-count">已选择 {{selectedBooks.length}} 项</text>
+    </view>
+    <view class="edit-actions">
+      <view class="edit-action" bindtap="selectAll">
+        <text>{{isAllSelected ? '取消全选' : '全选'}}</text>
+      </view>
+      <view class="edit-action delete-action" bindtap="batchDelete">
+        <text>删除</text>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{bookList.length === 0}}">
+    <image src="/images/empty/bookshelf.png" class="empty-image" />
+    <text class="empty-title">
+      {{activeTab === 'collection' ? '暂无收藏书籍' : '暂无播放历史'}}
+    </text>
+    <text class="empty-tip">
+      {{activeTab === 'collection' ? '快去首页发现好书吧' : '快去听听喜欢的书吧'}}
+    </text>
+    <button class="empty-btn" bindtap="goToHome">
+      去发现好书
+    </button>
+  </view>
+  
+  <!-- 书籍列表 -->
+  <scroll-view class="bookshelf-list" scroll-y wx:else>
+    <block wx:for="{{bookList}}" wx:key="id">
+      <view 
+        class="book-card {{isEditMode ? 'edit-mode' : ''}} {{selectedBooks.includes(item.id) ? 'selected' : ''}}" 
+        bindtap="{{isEditMode ? 'toggleSelect' : 'goToBookDetail'}}" 
+        data-id="{{item.id}}"
+        data-index="{{index}}"
+       style="position: relative; left: 0rpx; top: 0rpx; width: 695rpx; display: flex; box-sizing: border-box">
+        <!-- 选中标记 -->
+        <view class="select-checkbox" wx:if="{{isEditMode}}">
+          <image 
+            src="{{selectedBooks.includes(item.id) ? '/images/icons/checkbox-checked.png' : '/images/icons/checkbox.png'}}" 
+            class="checkbox-icon" 
+          />
+        </view>
+        
+        <image src="{{item.cover}}" class="book-cover" />
+        <view class="book-content">
+          <view class="book-header">
+            <text class="book-title">{{item.title}}</text>
+            <view class="book-actions">
+              <image 
+                src="{{item.isFavorite ? '/images/icons/favorite-filled.png' : '/images/icons/favorite.png'}}" 
+                class="action-icon favorite-icon" 
+                bindtap="toggleFavorite" 
+                data-id="{{item.id}}"
+                catchtap="stopPropagation"
+                wx:if="{{!isEditMode}}"
+              />
+              <image src="/images/icons/more.png" class="action-icon more-icon" bindtap="showActionSheet" data-id="{{item.id}}" catchtap="stopPropagation" />
+            </view>
+          </view>
+          <text class="book-author">{{item.author}}</text>
+          
+          <!-- 进度条 -->
+          <view class="progress-section" wx:if="{{activeTab === 'history'}}">
+            <view class="progress-info">
+              <text class="progress-text">上次听到 {{item.lastPlayTime}}</text>
+              <text class="progress-percent">{{item.progress}}%</text>
+            </view>
+            <progress 
+              percent="{{item.progress}}" 
+              activeColor="#4A90E2" 
+              backgroundColor="#e5e5e5" 
+              stroke-width="8"
+              show-info="{{false}}"
+            />
+          </view>
+          
+          <!-- 其他信息 -->
+          <view class="book-meta">
+            <text class="meta-item">
+              <image src="/images/icons/time.png" class="meta-icon" />
+              {{item.duration}}分钟
+            </text>
+            <text class="meta-item">
+              <image src="/images/icons/play.png" class="meta-icon" />
+              {{item.playCount}}次
+            </text>
+            <text class="meta-item category-tag">{{item.category}}</text>
+          </view>
+          
+          <!-- 继续播放按钮 -->
+          <button class="continue-btn" bindtap="continuePlay" data-id="{{item.id}}" catchtap="stopPropagation" wx:if="{{activeTab === 'history' && item.progress < 100}}">
+            继续播放
+          </button>
+        </view>
+        
+        <!-- 最近播放时间 -->
+        <view class="last-play-time" wx:if="{{activeTab === 'history' && !isEditMode}}">
+          <text>{{formatLastPlayTime(item.lastPlayTime)}}</text>
+        </view>
+      </view>
+    </block>
+  </scroll-view>
+  
+  <!-- 操作菜单 -->
+  <action-sheet 
+    id="action-sheet" 
+    bind:close="hideActionSheet" 
+    bind:select="onActionSelect"
+    show-cancel="{{true}}"
+  />
+</view>

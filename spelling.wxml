@@ -1,0 +1,84 @@
+<view class="spelling-container">
+  <!-- 顶部栏 -->
+  <view class="game-header">
+    <view class="back-btn" bindtap="goBack">←</view>
+    <text class="game-title">单词拼写游戏</text>
+    <view class="score">得分: {{score}}</view>
+  </view>
+  
+  <!-- 游戏区域 -->
+  <view class="game-area">
+    <!-- 当前单词卡片 -->
+    <view class="word-card">
+      <view class="card-header">
+        <text class="word-meaning">{{currentWord.chinese}}</text>
+        <view class="hint-btn" bindtap="toggleHint">💡</view>
+      </view>
+      
+      <!-- 单词拼写区域 -->
+      <view class="spelling-area">
+        <view class="current-spelling">
+          <view class="letter-box" wx:for="{{currentSpelling}}" wx:key="index">
+            {{item}}
+          </view>
+        </view>
+        
+        <!-- 字母选择区 -->
+        <view class="letters-choice">
+          <view class="letter-option" 
+                wx:for="{{letterOptions}}" 
+                wx:key="index"
+                bindtap="selectLetter"
+                data-letter="{{item}}">
+            {{item}}
+          </view>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 控制按钮 -->
+    <view class="control-buttons">
+      <view class="btn delete-btn" bindtap="deleteLetter">
+        <text>删除</text>
+      </view>
+      <view class="btn submit-btn" bindtap="checkAnswer">
+        <text>提交</text>
+      </view>
+      <view class="btn skip-btn" bindtap="nextWord">
+        <text>跳过</text>
+      </view>
+    </view>
+    
+    <!-- 提示区域 -->
+    <view class="hint-area" wx:if="{{showHint}}">
+      <text class="hint-text">提示: {{currentWord.hint}}</text>
+    </view>
+    
+    <!-- 进度条 -->
+    <view class="progress-section">
+      <view class="progress-bar">
+        <view class="progress-fill" style="width: {{(currentIndex/totalWords)*100}}%;"></view>
+      </view>
+      <text class="progress-text">{{currentIndex}}/{{totalWords}}</text>
+    </view>
+  </view>
+  
+  <!-- 结果弹窗 -->
+  <view class="result-modal" wx:if="{{showResult}}">
+    <view class="modal-content">
+      <text class="result-icon">{{resultIcon}}</text>
+      <text class="result-title">{{resultTitle}}</text>
+      <text class="result-word">正确单词: {{currentWord.english}}</text>
+      <text class="result-meaning">释义: {{currentWord.chinese}}</text>
+      
+      <view class="result-buttons">
+        <view class="result-btn next-btn" bindtap="nextWord">
+          <text>下一个</text>
+        </view>
+        <view class="result-btn back-btn" bindtap="backToPlayer">
+          <text>返回播放器</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

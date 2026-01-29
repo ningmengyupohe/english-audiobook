@@ -1,0 +1,199 @@
+<!-- 导航栏 -->
+<view class="nav-bar">
+  <view class="nav-back" bindtap="goBack">
+    <text class="nav-icon">⬅️</text>
+  </view>
+  <text class="nav-title">{{categoryName}}</text>
+  <view style="width: 60rpx"></view>
+</view>
+
+<view class="category-container">
+  <!-- 筛选栏 -->
+  <view class="filter-bar">
+    <view class="filter-tabs">
+      <view 
+        class="filter-tab {{filterIndex === 0 ? 'active' : ''}}" 
+        data-index="0" 
+        bindtap="changeFilter"
+      >
+        最热
+      </view>
+      <view 
+        class="filter-tab {{filterIndex === 1 ? 'active' : ''}}" 
+        data-index="1" 
+        bindtap="changeFilter"
+      >
+        最新
+      </view>
+      <view 
+        class="filter-tab {{filterIndex === 2 ? 'active' : ''}}" 
+        data-index="2" 
+        bindtap="changeFilter"
+      >
+        推荐
+      </view>
+    </view>
+    <view class="filter-more" bindtap="showMoreFilter">
+      <text class="filter-icon">⚙️</text>
+      <text class="filter-text">筛选</text>
+    </view>
+  </view>
+
+  <!-- 书籍列表 -->
+  <scroll-view 
+    class="book-list" 
+    scroll-y 
+    bindscrolltolower="loadMore"
+    enable-back-to-top="true"
+  >
+    <!-- 筛选条件显示 -->
+    <view class="active-filters" wx:if="{{selectedDifficulty || minDuration || maxDuration}}">
+      <text class="active-filter-text">当前筛选：</text>
+      <view class="filter-tags">
+        <view class="filter-tag" wx:if="{{selectedDifficulty}}">
+          <text class="filter-tag-text">难度：{{selectedDifficulty}}</text>
+          <text class="filter-tag-remove" data-type="difficulty" bindtap="removeFilter">×</text>
+        </view>
+        <view class="filter-tag" wx:if="{{minDuration}}">
+          <text class="filter-tag-text">时长≥{{minDuration}}分钟</text>
+          <text class="filter-tag-remove" data-type="minDuration" bindtap="removeFilter">×</text>
+        </view>
+        <view class="filter-tag" wx:if="{{maxDuration}}">
+          <text class="filter-tag-text">时长≤{{maxDuration}}分钟</text>
+          <text class="filter-tag-remove" data-type="maxDuration" bindtap="removeFilter">×</text>
+        </view>
+        <view class="filter-tag clear-all" bindtap="resetFilters">
+          <text class="filter-tag-text">清除所有</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 书籍卡片列表 -->
+    <view class="books-container">
+      <block wx:for="{{bookList}}" wx:key="id">
+        <view class="book-card" data-id="{{item.id}}" bindtap="goToBookDetail">
+          <!-- 书籍封面 -->
+          <view class="book-cover">
+            <image src="{{item.cover}}" mode="aspectFill" class="cover-image"></image>
+            <view class="cover-overlay">
+              <text class="duration-text">{{item.duration}}分钟</text>
+              <view class="play-btn" data-id="{{item.id}}" bindtap="playBook" catchtap="stopPropagation">
+                <text class="play-icon">▶️</text>
+              </view>
+            </view>
+            <view class="difficulty-badge">{{item.difficulty}}</view>
+          </view>
+
+          <!-- 书籍信息 -->
+          <view class="book-info">
+            <view class="book-header">
+              <text class="book-title">{{item.title}}</text>
+              <view class="favorite-btn" data-id="{{item.id}}" bindtap="toggleFavorite" catchtap="stopPropagation">
+                <text class="favorite-icon">{{item.isFavorite ? '❤️' : '🤍'}}</text>
+              </view>
+            </view>
+            
+            <text class="book-author">👤 {{item.author}}</text>
+            <text class="book-play-count">👁️ {{item.playCount}}次播放</text>
+            
+            <view class="book-description">
+              <text class="description-text">{{item.description}}</text>
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+
+    <!-- 加载更多 -->
+    <view class="load-more">
+      <text class="load-text" wx:if="{{isLoading}}">加载中...</text>
+      <text class="load-text" wx:if="{{!hasMore && !isLoading}}">没有更多了</text>
+      <text class="load-text" wx:if="{{hasMore && !isLoading}}" bindtap="loadMore">点击加载更多</text>
+    </view>
+  </scroll-view>
+
+  <!-- 浮动播放器 -->
+  <view class="floating-player" wx:if="{{currentPlayingBook}}" catchtap="goToPlayer">
+    <view class="player-content">
+      <image src="{{currentPlayingBook.cover}}" class="player-cover"></image>
+      <view class="player-info">
+        <text class="player-title">{{currentPlayingBook.title}}</text>
+        <text class="player-subtitle">{{currentPlayingBook.author}}</text>
+      </view>
+      <view class="player-controls">
+        <view class="player-btn stop-btn" bindtap="stopPlay" catchtap="stopPropagation">
+          <text class="player-icon">⏹️</text>
+        </view>
+        <view class="player-btn play-btn" bindtap="toggleFloatingPlay" catchtap="stopPropagation">
+          <text class="player-icon">{{isPlaying ? '⏸️' : '▶️'}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 筛选弹窗 -->
+  <view class="filter-modal" wx:if="{{showFilterModal}}">
+    <view class="modal-mask" bindtap="hideFilterModal"></view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">筛选条件</text>
+        <view class="modal-close" bindtap="hideFilterModal">
+          <text class="close-icon">×</text>
+        </view>
+      </view>
+
+      <view class="modal-body">
+        <!-- 难度筛选 -->
+        <view class="filter-section">
+          <text class="filter-label">难度级别</text>
+          <view class="difficulty-options">
+            <block wx:for="{{difficultyOptions}}" wx:key="value">
+              <view 
+                class="difficulty-option {{selectedDifficulty === item.value ? 'active' : ''}}" 
+                data-value="{{item.value}}" 
+                bindtap="selectDifficulty"
+              >
+                <text class="difficulty-text">{{item.label}}</text>
+              </view>
+            </block>
+          </view>
+        </view>
+
+        <!-- 时长筛选 -->
+        <view class="filter-section">
+          <text class="filter-label">时长范围（分钟）</text>
+          <view class="duration-inputs">
+            <view class="duration-input-group">
+              <text class="duration-label">最短</text>
+              <input 
+                type="number" 
+                value="{{minDuration}}" 
+                placeholder="0" 
+                placeholder-class="placeholder"
+                class="duration-input"
+                bindinput="onMinDurationInput"
+              />
+            </view>
+            <text class="duration-separator">-</text>
+            <view class="duration-input-group">
+              <text class="duration-label">最长</text>
+              <input 
+                type="number" 
+                value="{{maxDuration}}" 
+                placeholder="不限" 
+                placeholder-class="placeholder"
+                class="duration-input"
+                bindinput="onMaxDurationInput"
+              />
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view class="modal-footer">
+        <view class="filter-btn reset-btn" bindtap="resetFilters">重置</view>
+        <view class="filter-btn apply-btn" bindtap="applyFilters">应用</view>
+      </view>
+    </view>
+  </view>
+</view>

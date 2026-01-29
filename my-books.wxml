@@ -1,0 +1,87 @@
+<!-- pages/my-books/my-books.wxml -->
+<view class="my-books-container">
+  <!-- 导航栏 -->
+  <view class="nav-bar">
+    <view class="nav-back" bindtap="goBack">
+      <text class="nav-icon">⬅️</text>
+    </view>
+    <text class="nav-title">{{title}}</text>
+    <view style="width: 60rpx"></view>
+  </view>
+
+  <!-- 简单的统计信息（根据配置显示） -->
+  <view class="simple-stats" wx:if="{{pageConfig.showStats && !isEmpty}}">
+    <text class="stats-text">共 {{bookList.length}} 本书</text>
+  </view>
+
+  <!-- 书籍列表 -->
+  <scroll-view 
+    class="book-list" 
+    scroll-y 
+    enable-back-to-top="true"
+    refresher-enabled="true"
+    refresher-triggered="{{isLoading && bookList.length === 0}}"
+    bindrefresherrefresh="onPullDownRefresh"
+  >
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{isEmpty && !isLoading}}">
+      <image src="/images/empty/books-empty.png" class="empty-img" />
+      <text class="empty-text">暂无{{title}}</text>
+    </view>
+
+    <!-- 书籍卡片列表 -->
+    <view class="books-container" wx:if="{{!isEmpty}}">
+      <block wx:for="{{bookList}}" wx:key="id">
+        <view class="book-card" data-id="{{item.id}}" bindtap="goToBookDetail">
+          <!-- 书籍封面 -->
+          <view class="book-cover">
+            <image src="{{item.cover}}" mode="aspectFill" class="cover-image"></image>
+            <view class="cover-overlay">
+              <text class="duration-text">{{item.duration}}分钟</text>
+              <view class="status-badge" wx:if="{{item.status}}">
+                <text class="badge-text">{{item.status}}</text>
+              </view>
+            </view>
+            <view class="difficulty-badge">{{item.level}}</view>
+            
+            <!-- 进度条 -->
+            <view class="progress-bar" wx:if="{{item.progress > 0}}">
+              <view class="progress-fill" style="width: {{item.progress}}'%'"></view>
+            </view>
+          </view>
+
+          <!-- 书籍信息 -->
+          <view class="book-info">
+            <view class="book-header">
+              <text class="book-title">{{item.title}}</text>
+            </view>
+            
+            <text class="book-author">👤 {{item.author}}</text>
+            
+            <view class="book-meta">
+              <text class="meta-item">📖 {{item.level}}</text>
+              <text class="meta-item">⏱️ {{item.duration}}分钟</text>
+              <text class="meta-item" wx:if="{{item.chapterInfo}}">📚 {{item.chapterInfo}}</text>
+            </view>
+            
+            <view class="book-description">
+              <text class="description-text">{{item.description}}</text>
+            </view>
+            
+            <view class="book-footer">
+              <text class="last-read" wx:if="{{item.lastReadTime}}">
+                📅 {{item.lastReadTime}}
+              </text>
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+
+    <!-- 加载状态 -->
+    <view class="load-more" wx:if="{{isLoading && bookList.length > 0}}">
+      <view class="loading-spinner"></view>
+      <text class="load-text">加载中...</text>
+    </view>
+  </scroll-view>
+</view>

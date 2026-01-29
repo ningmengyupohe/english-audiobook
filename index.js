@@ -1,10 +1,2 @@
-// 统一导出所有工具函数
-export * from './request.js'
-export * from './uni-cloud.js'
-export * from './audio.js'
-export * from './auth.js'
-export * from './storage.js'
-export * from './format.js'
-export * from './media.js'
-export * from './subtitle.js'
-export * from './validator.js'
+// index.js
+Page({})

@@ -1,0 +1,285 @@
+<!-- pages/search/search.wxml -->
+<view class="search-container">
+  <!-- 顶部搜索栏 -->
+  <view class="search-header">
+    <view class="search-bar">
+      <view class="search-back" bindtap="goBack">
+        <text class="search-back-icon">←</text>
+      </view>
+      <view class="search-input-container">
+        <text class="search-icon">🔍</text>
+        <input 
+          class="search-input" 
+          placeholder="搜索分类、书籍、作者..." 
+          placeholder-class="search-placeholder"
+          value="{{searchKeyword}}"
+          bindinput="onSearchInput"
+          bindconfirm="onSearchConfirm"
+          confirm-type="search"
+          focus="{{true}}"
+        />
+        <text class="search-clear" wx:if="{{searchKeyword}}" bindtap="clearSearch">✕</text>
+      </view>
+      <view class="search-cancel" bindtap="goBack">
+        取消
+      </view>
+    </view>
+  </view>
+
+  <!-- 筛选标签区域 -->
+  <view class="filter-tags-section" wx:if="{{showFilters}}">
+    <!-- 排序方式筛选 -->
+    <view class="filter-group">
+      <text class="filter-label">排序方式：</text>
+      <view class="filter-tags">
+        <view 
+          class="filter-tag {{activeSort === 'relevance' ? 'active' : ''}}" 
+          data-sort="relevance"
+          bindtap="switchSort"
+        >
+          <text class="tag-text">相关度</text>
+        </view>
+        <view 
+          class="filter-tag {{activeSort === 'hot' ? 'active' : ''}}" 
+          data-sort="hot"
+          bindtap="switchSort"
+        >
+          <text class="tag-text">最热</text>
+        </view>
+        <view 
+          class="filter-tag {{activeSort === 'latest' ? 'active' : ''}}" 
+          data-sort="latest"
+          bindtap="switchSort"
+        >
+          <text class="tag-text">最新</text>
+        </view>
+        <view 
+          class="filter-tag {{activeSort === 'recommend' ? 'active' : ''}}" 
+          data-sort="recommend"
+          bindtap="switchSort"
+        >
+          <text class="tag-text">推荐</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 难度级别筛选 -->
+    <view class="filter-group">
+      <text class="filter-label">难度级别：</text>
+      <view class="filter-tags">
+        <view 
+          class="filter-tag {{activeDifficulty === 'all' ? 'active' : ''}}" 
+          data-difficulty="all"
+          bindtap="switchDifficulty"
+        >
+          <text class="tag-text">全部</text>
+        </view>
+        <view 
+          class="filter-tag {{activeDifficulty === '初级' ? 'active' : ''}}" 
+          data-difficulty="初级"
+          bindtap="switchDifficulty"
+        >
+          <text class="tag-text">初级</text>
+        </view>
+        <view 
+          class="filter-tag {{activeDifficulty === '中级' ? 'active' : ''}}" 
+          data-difficulty="中级"
+          bindtap="switchDifficulty"
+        >
+          <text class="tag-text">中级</text>
+        </view>
+        <view 
+          class="filter-tag {{activeDifficulty === '高级' ? 'active' : ''}}" 
+          data-difficulty="高级"
+          bindtap="switchDifficulty"
+        >
+          <text class="tag-text">高级</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 分类标签筛选 -->
+    <view class="filter-group" wx:if="{{categoryTags.length > 0}}">
+      <text class="filter-label">分类标签：</text>
+      <view class="filter-tags">
+        <view 
+          wx:for="{{categoryTags}}" 
+          wx:key="id"
+          class="filter-tag {{activeCategories.indexOf(item.id) !== -1 ? 'active' : ''}}" 
+          data-category="{{item.id}}"
+          bindtap="toggleCategory"
+        >
+          <!-- 修改：只显示分类名称，移除图标和数量 -->
+          <text class="tag-text">{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 清除所有筛选 -->
+    <view class="clear-filters" wx:if="{{hasActiveFilters}}">
+      <view class="clear-all-btn" bindtap="clearAllFilters">
+        <text class="clear-icon">🗑️</text>
+        <text class="clear-text">清除所有筛选</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 搜索结果区域 -->
+  <view class="search-results" wx:if="{{showSearchResults}}">
+    <!-- 加载状态 -->
+    <view class="loading-state" wx:if="{{isLoading}}">
+      <view class="loading-content">
+        <view class="loading-spinner"></view>
+        <text class="loading-text">正在搜索...</text>
+      </view>
+    </view>
+    
+    <!-- 错误状态 -->
+    <view class="error-state" wx:if="{{loadError && !isLoading}}">
+      <view class="error-content">
+        <text class="error-icon">😔</text>
+        <text class="error-title">{{errorMessage || '搜索失败'}}</text>
+        <text class="error-desc">请检查网络连接后重试</text>
+        <button class="retry-button" bindtap="retrySearch">
+          重新搜索
+        </button>
+      </view>
+    </view>
+    
+    <!-- 搜索结果统计 -->
+    <view class="results-stats" wx:if="{{!isLoading && !loadError && filteredResults.length > 0}}">
+      <text class="results-count">
+        找到 <text class="count-number">{{filteredResults.length}}</text> 个结果
+      </text>
+    </view>
+    
+    <!-- 搜索结果列表 -->
+    <scroll-view 
+      class="results-scroll" 
+      scroll-y 
+      bindscrolltolower="loadMore"
+      enable-back-to-top="true"
+      wx:if="{{!isLoading && !loadError}}"
+    >
+      <!-- 无结果状态 -->
+      <view class="no-results" wx:if="{{filteredResults.length === 0 && searchKeyword}}">
+        <view class="no-results-content">
+          <text class="no-results-icon">🔍</text>
+          <text class="no-results-title">未找到相关内容</text>
+          <text class="no-results-desc">
+            没有找到与 "{{searchKeyword}}" 相关的内容
+          </text>
+          <button class="no-results-button" bindtap="clearSearch">
+            重新搜索
+          </button>
+        </view>
+      </view>
+      
+      <!-- 书籍结果 -->
+      <view class="books-list" wx:if="{{filteredResults.length > 0}}">
+        <view class="book-card" 
+              wx:for="{{filteredResults}}" 
+              wx:key="_id"
+              data-id="{{item._id}}"
+              bindtap="goToBook">
+          <view class="book-cover-container">
+            <image 
+              src="{{item.cover || '/images/covers/default.jpg'}}" 
+              class="book-cover"
+              mode="aspectFill"
+            />
+            <view class="book-badge" wx:if="{{item.recommendBadge}}">
+              <text class="badge-text">{{item.recommendBadge === 'hot' ? '热门' : '推荐'}}</text>
+            </view>
+          </view>
+          <view class="book-info">
+            <text class="book-title">{{item.title}}</text>
+            <text class="book-author">{{item.author || '未知作者'}}</text>
+            <view class="book-meta">
+              <view class="book-meta-item">
+                <text class="meta-icon">📖</text>
+                <text class="meta-text">{{item.totalChapters || 0}}章</text>
+              </view>
+              <view class="book-meta-item">
+                <text class="meta-icon">❤️</text>
+                <text class="meta-text">{{item.likeCount || 0}}</text>
+              </view>
+              <view class="book-meta-item">
+                <view class="level-badge {{getDifficultyClass(item.level)}}">
+                  {{item.level || '中级'}}
+                </view>
+              </view>
+            </view>
+            <text class="book-desc" wx:if="{{item.description}}">
+              {{item.description}}
+            </text>
+            <view class="book-tags">
+              <view class="book-tag" style="border-color: {{getCategoryColor(item.categoryId)}}; color: {{getCategoryColor(item.categoryId)}}">
+                {{item.categoryName || '未分类'}}
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 加载更多 -->
+      <view class="load-more" wx:if="{{hasMore && filteredResults.length > 0}}">
+        <text class="load-text" wx:if="{{!isLoading}}">上拉加载更多...</text>
+        <view class="loading-more" wx:if="{{isLoading}}">
+          <view class="loading-dots">
+            <text class="dot"></text>
+            <text class="dot"></text>
+            <text class="dot"></text>
+          </view>
+          <text class="loading-text">加载中</text>
+        </view>
+      </view>
+      
+      <!-- 无更多数据 -->
+      <view class="no-more" wx:if="{{!hasMore && filteredResults.length > 0}}">
+        <text class="no-more-text">没有更多内容了</text>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 搜索初始状态（无关键词时） -->
+  <view class="search-init" wx:if="{{!searchKeyword && !isLoading && !loadError && searchResults.length === 0}}">
+    <view class="init-content" style="height: 1327rpx; display: flex; box-sizing: border-box">
+      <text class="init-icon">🔍</text>
+      <text class="init-title">搜索你想找的内容</text>
+      <text class="init-desc">输入关键词搜索分类、书籍或作者</text>
+      
+      <!-- 热门搜索标签 -->
+      <view class="hot-tags">
+        <view class="hot-tag" 
+              wx:for="{{hotKeywords}}" 
+              wx:key="index" 
+              data-keyword="{{item.keyword}}" 
+              bindtap="onHotKeywordTap"
+              style="background: {{item.color}}">
+          <text class="hot-tag-icon">{{item.icon}}</text>
+          <text class="hot-tag-text">{{item.keyword}}</text>
+          <text class="hot-tag-type">{{item.type}}</text>
+        </view>
+      </view>
+      
+      <!-- 最近搜索 -->
+      <view class="recent-search" wx:if="{{searchHistory.length > 0}}">
+        <view class="recent-header">
+          <text class="recent-title">最近搜索</text>
+          <text class="recent-clear" bindtap="clearSearchHistory">清空</text>
+        </view>
+        <view class="recent-list">
+          <view class="recent-item" 
+                wx:for="{{searchHistory}}" 
+                wx:key="index" 
+                data-keyword="{{item}}"
+                bindtap="onHistoryTap">
+            <text class="recent-icon">🕐</text>
+            <text class="recent-text">{{item}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

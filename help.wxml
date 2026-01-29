@@ -1,0 +1,82 @@
+<view class="help-container">
+  <!-- 头部 -->
+  <view class="help-header">
+    <view class="back-btn" bindtap="goBack">
+      <image src="/images/icons/back.png" class="back-icon" />
+    </view>
+    <text class="header-title">帮助中心</text>
+    <view class="header-right">
+      <image src="/images/icons/search.png" class="search-icon" bindtap="goToSearch" />
+    </view>
+  </view>
+  
+  <!-- 搜索框 -->
+  <view class="search-section">
+    <view class="search-box" bindtap="goToSearch">
+      <image src="/images/icons/search.png" class="search-icon-small" />
+      <text class="search-placeholder">搜索问题或关键词</text>
+    </view>
+  </view>
+  
+  <!-- 常见问题 -->
+  <view class="faq-section">
+    <text class="section-title">常见问题</text>
+    <view class="faq-list">
+      <block wx:for="{{faqList}}" wx:key="id">
+        <view class="faq-item" bindtap="toggleFaq" data-index="{{index}}">
+          <view class="faq-question">
+            <text class="question-text">{{index + 1}}. {{item.question}}</text>
+            <image 
+              src="{{item.expanded ? '/images/icons/arrow-up.png' : '/images/icons/arrow-down.png'}}" 
+              class="faq-arrow" 
+            />
+          </view>
+          <view class="faq-answer" wx:if="{{item.expanded}}">
+            <text class="answer-text">{{item.answer}}</text>
+          </view>
+        </view>
+      </block>
+    </view>
+  </view>
+  
+  <!-- 分类帮助 -->
+  <view class="category-section">
+    <text class="section-title">分类帮助</text>
+    <view class="category-grid">
+      <block wx:for="{{helpCategories}}" wx:key="id">
+        <view class="category-item" bindtap="goToCategoryHelp" data-id="{{item.id}}">
+          <image src="{{item.icon}}" class="category-icon" />
+          <text class="category-name">{{item.name}}</text>
+        </view>
+      </block>
+    </view>
+  </view>
+  
+  <!-- 联系客服 -->
+  <view class="contact-section">
+    <view class="contact-card">
+      <image src="/images/icons/customer-service.png" class="contact-icon" />
+      <view class="contact-info">
+        <text class="contact-title">联系客服</text>
+        <text class="contact-subtitle">我们随时为您服务</text>
+      </view>
+      <button class="contact-btn" bindtap="contactCustomerService">联系</button>
+    </view>
+  </view>
+  
+  <!-- 底部导航 -->
+  <view class="bottom-nav">
+    <view class="nav-item" bindtap="goToFeedback">
+      <image src="/images/icons/feedback.png" class="nav-icon" />
+      <text class="nav-text">意见反馈</text>
+    </view>
+    <view class="nav-item" bindtap="goToUserAgreement">
+      <image src="/images/icons/agreement.png" class="nav-icon" />
+      <text class="nav-text">用户协议</text>
+    </view>
+    <view class="nav-item" bindtap="goToPrivacyPolicy">
+      <image src="/images/icons/privacy.png" class="nav-icon" />
+      <text class="nav-text">隐私政策</text>
+    </view>
+  </view>
+</view>

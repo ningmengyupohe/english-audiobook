@@ -1,0 +1,320 @@
+<view class="home-container">
+  <!-- 加载状态 -->
+  <view class="loading-container" wx:if="{{isLoading}}">
+    <view class="loading-content">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+  </view>
+
+  <!-- 页面内容 -->
+  <view class="home-content" wx:else>
+    <!-- 顶部渐变背景 -->
+    <view class="header-bg"></view>
+    
+    <!-- 顶部栏 -->
+    <view class="top-bar">
+      <view class="greeting-section">
+        <text class="greeting">{{greeting}}</text>
+        <text class="user-name" wx:if="{{userInfo}}">{{userInfo.nickname}}</text>
+        <text class="user-name" wx:else>欢迎使用英语听书</text>
+      </view>
+      <view class="avatar-section" bindtap="goToProfile">
+        <image src="{{userInfo ? userInfo.avatar : '/images/avatar/default.png'}}" class="user-avatar" />
+
+      </view>
+    </view>
+    
+    <!-- 搜索栏 -->
+    <view class="search-section">
+      <view class="search-container" bindtap="onSearchTap">
+        <text class="search-icon">🔍</text>
+        <input 
+          class="search-input" 
+          placeholder="搜索书籍、作者或分类..." 
+          placeholder-class="search-placeholder"
+          value="{{searchKeyword}}"
+          bindinput="onSearchInput"
+          confirm-type="search"
+        />
+        <text class="search-clear" wx:if="{{searchKeyword}}" bindtap="clearSearch">✕</text>
+        <view class="search-action" bindtap="onSearchTap">
+          <text class="search-button">搜索</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 搜索结果弹层 -->
+    <view class="search-results-layer" wx:if="{{showSearchResults}}">
+      <view class="search-results-container">
+        <view class="search-results-header">
+          <text class="search-results-title">
+            {{searchResults.length > 0 ? '搜索结果 (' + searchResults.length + ')' : '搜索结果'}}
+          </text>
+          <text class="search-close" bindtap="clearSearch">关闭</text>
+        </view>
+        
+        <!-- 搜索中状态 -->
+        <view class="search-loading-placeholder" wx:if="{{isSearching}}">
+          <view class="loading-spinner-small"></view>
+          <text class="loading-text">搜索中...</text>
+        </view>
+        
+        <!-- 无数据占位 -->
+        <view class="search-empty-placeholder" wx:if="{{!isSearching && searchResults.length === 0}}">
+          <image src="/images/empty/search-empty.png" class="empty-image" />
+          <text class="empty-title">未找到相关内容</text>
+          <text class="empty-desc">换个关键词试试吧</text>
+          <view class="empty-action" bindtap="clearSearch">
+            <text class="empty-action-text">返回搜索</text>
+          </view>
+        </view>
+        
+        <!-- 搜索结果列表 -->
+        <scroll-view 
+          class="search-results-list" 
+          scroll-y="true"
+          wx:if="{{!isSearching && searchResults.length > 0}}">
+          <view class="search-result-item" 
+                wx:for="{{searchResults}}" 
+                wx:key="id"
+                data-id="{{item.id}}"
+                bindtap="onSearchResultTap">
+            <image src="{{item.cover || '/images/covers/default.jpg'}}" class="result-cover" />
+            <view class="result-info">
+              <text class="result-title">{{item.title}}</text>
+              <text class="result-author">{{item.author}}</text>
+              <view class="result-meta">
+                <text class="meta-item">🎧 {{item.playCount || 0}}</text>
+                <text class="meta-item">⭐ {{item.rating || '0.0'}}</text>
+                <text class="meta-item" wx:if="{{item.duration}}">{{item.duration}}</text>
+              </view>
+            </view>
+          </view>
+        </scroll-view>
+      </view>
+    </view>
+    
+    <!-- 轮播图 -->
+    <view class="banner-section">
+      <swiper class="banner-swiper" 
+              indicator-dots="{{true}}" 
+              indicator-color="rgba(255,255,255,0.4)"
+              indicator-active-color="#FFFFFF"
+              autoplay="{{true}}" 
+              interval="{{3000}}" 
+              circular="{{true}}"
+              current="{{bannerIndex}}"
+              bindchange="onBannerChange">
+        <block wx:for="{{banners}}" wx:key="id">
+          <swiper-item>
+            <view class="banner-item" data-id="{{item.id}}" bindtap="onBannerTap">
+              <image src="{{item.imageUrl}}" class="banner-image" mode="aspectFill" />
+              <view class="banner-overlay" style="background: linear-gradient(to top, {{item.color}}99, transparent 60%)">
+                <view class="banner-content">
+                  <text class="banner-title">{{item.title}}</text>
+                  <text class="banner-subtitle">{{item.subtitle}}</text>
+                </view>
+              </view>
+            </view>
+          </swiper-item>
+        </block>
+      </swiper>
+      <view class="banner-indicator">
+        <text class="banner-current">{{bannerIndex + 1}}</text>
+        <text class="banner-divider">/</text>
+        <text class="banner-total">{{banners.length}}</text>
+      </view>
+    </view>
+    
+    <!-- 快捷功能 -->
+    <view class="quick-actions-section">
+      <view class="section-header">
+        <text class="section-title">⚡ 快捷功能</text>
+      </view>
+      <scroll-view class="quick-actions-scroll" scroll-x="true">
+        <view class="quick-actions-list" >
+          <view class="quick-action-item" 
+                wx:for="{{quickActions}}" 
+                wx:key="id"
+                data-id="{{item.id}}"
+                data-page="{{item.page}}"
+                bindtap="onQuickActionTap">
+            <view class="action-icon" style="background-color: {{item.color}}20">
+              <text class="action-emoji">{{item.icon}}</text>
+            </view>
+            <text class="action-name">{{item.name}}</text>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+    
+
+    
+    <!-- 今日推荐 -->
+    <view wx:if="{{dailyRecommendation}}" 
+      class="daily-section" 
+      bindtap="onDailyRecommendTap"
+      bindlongpress="onDailyLongPress">
+      <view class="daily-card">
+        <view class="daily-badge">🎯 今日推荐</view>
+        <image src="{{dailyRecommendation.cover}}" class="daily-cover" />
+        <view class="daily-info">
+          <text class="daily-title">{{dailyRecommendation.title}}</text>
+          <text class="daily-author">{{dailyRecommendation.author}}</text>
+          <text class="daily-desc">{{dailyRecommendation.description}}</text>
+          <text class="daily-reason">{{dailyRecommendation.reason}}</text>
+        </view>
+        <view class="daily-action">
+          <text class="daily-button">立即收听</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 🆕 今日推荐空状态 -->
+    <view class="daily-empty-placeholder" wx:if="{{!dailyRecommendation && !isLoading}}">
+      <view class="daily-empty-card">
+        <image src="/images/empty/daily-empty.png" class="empty-image" />
+        <text class="empty-title">暂无今日推荐</text>
+        <text class="empty-desc">随机收听一本书籍吧</text>
+        <view class="empty-action" bindtap="randomPlay">
+          <text class="empty-action-text">随机播放</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 热门书籍 -->
+    <view class="hot-books-section">
+      <view class="section-header">
+        <text class="section-title">🔥 热门推荐</text>
+        <text class="section-more" bindtap="goToHotList">更多</text>
+      </view>
+      
+      <!-- 🆕 热门书籍空状态 -->
+      <view class="books-empty-placeholder" wx:if="{{!isLoading && hotBooks.length === 0}}">
+        <image src="/images/empty/books-empty.png" class="empty-image" />
+        <text class="empty-title">暂无热门书籍</text>
+        <text class="empty-desc">数据加载中或暂无推荐</text>
+        <view class="empty-action" bindtap="retryLoad">
+          <text class="empty-action-text">重新加载</text>
+        </view>
+      </view>
+      
+      <!-- 热门书籍列表 -->
+      <scroll-view class="books-scroll" scroll-x="true" wx:if="{{hotBooks.length > 0}}">
+        <view class="books-list">
+          <view class="book-card" 
+                wx:for="{{hotBooks}}" 
+                wx:key="id"
+                data-id="{{item.id}}"
+                bindtap="goToBookDetail">
+            <image src="{{item.cover}}" class="book-cover" />
+            <view class="book-badge" wx:if="{{item.isFree}}">免费</view>
+            <view class="book-info">
+              <text class="book-title">{{item.title}}</text>
+              <text class="book-author">{{item.author}}</text>
+              <view class="book-meta">
+                <view class="meta-item">
+                  <text class="meta-icon">🎧</text>
+                  <text class="meta-text">{{item.playCount}}</text>
+                </view>
+                <view class="meta-item">
+                  <text class="meta-icon">⭐</text>
+                  <text class="meta-text">{{item.rating}}</text>
+                </view>
+                <view class="meta-item">
+                  <text class="meta-icon">⏰</text>
+                  <text class="meta-text">{{item.duration}}</text>
+                </view>
+              </view>
+              <view class="book-tags">
+                <text class="book-tag" wx:for="{{item.tags}}" wx:key="*this">{{item}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+    
+    <!-- 推荐分类 -->
+    <view class="categories-section">
+      <view class="section-header">
+        <text class="section-title">📚 热门分类</text>
+        <text class="section-more" bindtap="goToAllCategories">全部</text>
+      </view>
+      
+      <!-- 🆕 分类空状态 -->
+      <view class="categories-empty-placeholder" wx:if="{{!isLoading && recommendedCategories.length === 0}}">
+        <text class="empty-title">暂无分类数据</text>
+        <text class="empty-desc">正在加载分类信息</text>
+      </view>
+      
+      <!-- 分类列表 -->
+      <view class="categories-grid" wx:if="{{recommendedCategories.length > 0}}">
+  <view class="category-card" 
+        wx:for="{{recommendedCategories}}" 
+        wx:key="id"
+        data-id="{{item.id}}"
+        bindtap="goToCategory"
+        style="background: {{item.color}};">
+    <view class="category-icon">
+      <text class="category-emoji">{{item.icon || '📚'}}</text>
+    </view>
+    <view class="category-info">
+      <text class="category-name">{{item.name}}</text>
+      <text class="category-enname">{{item.enName}}</text>
+      <text class="category-count">{{item.bookCount}} 本书</text>
+    </view>
+    <view class="category-arrow">→</view>
+  </view>
+      </view>
+
+      <!-- 🚨 添加调试块，快速查看数据 -->
+      <view wx:if="{{false}}" style="padding: 20rpx; background: #f5f5f5; margin: 20rpx; border-radius: 10rpx;">
+  <text style="color: #333; font-weight: bold;">调试信息：</text>
+  <text style="color: #666;">{{recommendedCategories.length}} 个分类</text>
+  <view wx:for="{{recommendedCategories}}" wx:for-item="cat" style="margin-top: 10rpx;">
+    <text style="color: #ff5500;">{{cat.name}}: </text>
+    <text style="color: #666;">color={{cat.color}}, icon={{cat.icon}}</text>
+  </view>
+      </view>
+    </view>
+    
+    <!-- 底部功能区 -->
+    <view class="bottom-section">
+      <!-- 随机播放 -->
+      <view class="random-play-card" bindtap="randomPlay" animation="{{randomButtonAnimation}}">
+        <view class="random-icon">🎲</view>
+        <view class="random-info">
+          <text class="random-title">随机播放</text>
+          <text class="random-desc">试试你的听力运气</text>
+        </view>
+        <view class="random-button">开始</view>
+      </view>
+      
+      <!-- 正在播放 -->
+      <view class="now-playing-card" wx:if="{{nowPlaying}}" bindtap="onNowPlayingTap">
+        <view class="now-playing-badge">🎧 正在播放</view>
+        <image src="{{nowPlaying.cover}}" class="now-playing-cover" />
+        <view class="now-playing-info">
+          <text class="now-playing-title">{{nowPlaying.bookTitle}}</text>
+          <text class="now-playing-chapter">{{nowPlaying.chapter}}</text>
+          <view class="now-playing-progress">
+            <view class="progress-bar small">
+              <view class="progress-fill" style="width: {{nowPlaying.progress}}%;"></view>
+            </view>
+            <text class="progress-percent">{{nowPlaying.progress}}%</text>
+          </view>
+        </view>
+        <view class="now-playing-action">
+          <text class="play-icon">▶️</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 版权信息 -->
+    <view class="footer">
+      <text class="footer-text">英语听书 - 每天进步一点点</text>
+    </view>
+  </view>
+</view>

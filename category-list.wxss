@@ -1,0 +1,595 @@
+/* 全局样式 */
+page {
+  background-color: #f8fafc;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+}
+
+/* 导航栏 */
+.nav-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  background-color: white;
+  border-bottom: 1px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-back {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: #e3f2fd;
+}
+
+.nav-icon {
+  font-size: 36rpx;
+  color: #2196f3;
+  line-height: 1;
+}
+
+.nav-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #1e3a8a;
+  line-height: 1.2;
+}
+
+/* 主容器 */
+.category-container {
+  height: calc(100vh - 120rpx);
+  display: flex;
+  flex-direction: column;
+}
+
+/* 筛选栏 */
+.filter-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 30rpx;
+  background-color: white;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.filter-tabs {
+  display: flex;
+  gap: 32rpx;
+}
+
+.filter-tab {
+  font-size: 28rpx;
+  color: #64748b;
+  padding: 12rpx 0;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.filter-tab.active {
+  color: #2196f3;
+  font-weight: 600;
+}
+
+.filter-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4rpx;
+  background-color: #2196f3;
+  border-radius: 2rpx;
+}
+
+.filter-more {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 12rpx 24rpx;
+  background-color: #e3f2fd;
+  border-radius: 24rpx;
+  border: 1px solid #bbdefb;
+}
+
+.filter-icon {
+  font-size: 28rpx;
+  line-height: 1;
+}
+
+.filter-text {
+  font-size: 24rpx;
+  color: #2196f3;
+  line-height: 1.2;
+}
+
+/* 当前筛选标签 */
+.active-filters {
+  padding: 20rpx 30rpx;
+  background-color: white;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.active-filter-text {
+  font-size: 24rpx;
+  color: #64748b;
+  margin-bottom: 16rpx;
+  display: block;
+}
+
+.filter-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.filter-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 8rpx 16rpx;
+  background-color: #e3f2fd;
+  border-radius: 16rpx;
+  border: 1px solid #bbdefb;
+}
+
+.filter-tag-text {
+  font-size: 22rpx;
+  color: #2196f3;
+}
+
+.filter-tag-remove {
+  font-size: 24rpx;
+  color: #64748b;
+  font-weight: bold;
+  width: 24rpx;
+  height: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: #f1f5f9;
+}
+
+.filter-tag.clear-all {
+  background-color: #fef3c7;
+  border-color: #fde68a;
+}
+
+.filter-tag.clear-all .filter-tag-text {
+  color: #d97706;
+}
+
+/* 书籍列表 */
+.book-list {
+  flex: 1;
+  height: 0;
+}
+
+.books-container {
+  padding: 30rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 30rpx;
+}
+
+/* 书籍卡片 */
+.book-card {
+  background-color: white;
+  border-radius: 24rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+  display: flex;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.book-card:active {
+  transform: translateY(-2rpx);
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.12);
+}
+
+.book-cover {
+  width: 220rpx;
+  height: 260rpx;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.cover-image {
+  width: 100%;
+  height: 100%;
+}
+
+.cover-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, transparent 40%, rgba(0, 0, 0, 0.6) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 20rpx;
+}
+
+.duration-text {
+  color: white;
+  font-size: 22rpx;
+  margin-bottom: 16rpx;
+  font-weight: 500;
+}
+
+.play-btn {
+  width: 56rpx;
+  height: 56rpx;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+}
+
+.play-icon {
+  font-size: 28rpx;
+  margin-left: 4rpx;
+}
+
+.difficulty-badge {
+  position: absolute;
+  top: 16rpx;
+  right: 16rpx;
+  padding: 6rpx 12rpx;
+  background-color: rgba(33, 150, 243, 0.9);
+  color: white;
+  font-size: 20rpx;
+  border-radius: 12rpx;
+  font-weight: 500;
+}
+
+/* 书籍信息 */
+.book-info {
+  flex: 1;
+  padding: 24rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.book-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16rpx;
+}
+
+.book-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.3;
+  flex: 1;
+  margin-right: 16rpx;
+}
+
+.favorite-btn {
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.favorite-icon {
+  font-size: 32rpx;
+}
+
+.book-author,
+.book-play-count {
+  font-size: 24rpx;
+  color: #64748b;
+  margin-bottom: 8rpx;
+}
+
+.book-description {
+  margin-top: 16rpx;
+  flex: 1;
+}
+
+.description-text {
+  font-size: 26rpx;
+  color: #475569;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+/* 加载更多 */
+.load-more {
+  padding: 40rpx 0;
+  text-align: center;
+}
+
+.load-text {
+  font-size: 28rpx;
+  color: #64748b;
+}
+
+/* 浮动播放器 */
+.floating-player {
+  position: fixed;
+  bottom: 40rpx;
+  left: 30rpx;
+  right: 30rpx;
+  background-color: white;
+  border-radius: 24rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.15);
+  border: 1px solid #e2e8f0;
+  z-index: 1000;
+}
+
+.player-content {
+  display: flex;
+  align-items: center;
+  padding: 20rpx;
+}
+
+.player-cover {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 12rpx;
+  margin-right: 20rpx;
+}
+
+.player-info {
+  flex: 1;
+}
+
+.player-title {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.3;
+  margin-bottom: 4rpx;
+}
+
+.player-subtitle {
+  display: block;
+  font-size: 22rpx;
+  color: #64748b;
+}
+
+.player-controls {
+  display: flex;
+  gap: 16rpx;
+}
+
+.player-btn {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f1f5f9;
+  transition: background-color 0.2s ease;
+}
+
+.player-btn:active {
+  background-color: #e2e8f0;
+}
+
+.player-icon {
+  font-size: 28rpx;
+}
+
+.stop-btn .player-icon {
+  margin-left: 2rpx;
+}
+
+.play-btn .player-icon {
+  margin-left: 4rpx;
+}
+
+/* 筛选弹窗 */
+.filter-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2000;
+}
+
+.modal-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border-radius: 32rpx 32rpx 0 0;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32rpx;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.modal-close {
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: #f1f5f9;
+}
+
+.close-icon {
+  font-size: 36rpx;
+  color: #64748b;
+  font-weight: 300;
+}
+
+.modal-body {
+  flex: 1;
+  padding: 32rpx;
+  overflow-y: auto;
+}
+
+.filter-section {
+  margin-bottom: 48rpx;
+}
+
+.filter-label {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 24rpx;
+}
+
+.difficulty-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.difficulty-option {
+  padding: 16rpx 24rpx;
+  background-color: #f1f5f9;
+  border-radius: 20rpx;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.difficulty-option.active {
+  background-color: #2196f3;
+  border-color: #2196f3;
+}
+
+.difficulty-text {
+  font-size: 24rpx;
+  color: #64748b;
+  transition: color 0.2s ease;
+}
+
+.difficulty-option.active .difficulty-text {
+  color: white;
+}
+
+.duration-inputs {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+}
+
+.duration-input-group {
+  flex: 1;
+}
+
+.duration-label {
+  display: block;
+  font-size: 24rpx;
+  color: #64748b;
+  margin-bottom: 12rpx;
+}
+
+.duration-input {
+  width: 100%;
+  height: 80rpx;
+  padding: 0 24rpx;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+  color: #1e293b;
+  box-sizing: border-box;
+}
+
+.duration-separator {
+  font-size: 28rpx;
+  color: #64748b;
+  margin-top: 40rpx;
+}
+
+.placeholder {
+  color: #94a3b8;
+  font-size: 28rpx;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 24rpx;
+  padding: 32rpx;
+  border-top: 1px solid #e2e8f0;
+}
+
+.filter-btn {
+  flex: 1;
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  font-size: 28rpx;
+  font-weight: 600;
+  border-radius: 24rpx;
+}
+
+.reset-btn {
+  background-color: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.apply-btn {
+  background-color: #2196f3;
+  color: white;
+  border: none;
+}
+
+/* 响应式调整 */
+@media (max-width: 750rpx) {
+  .book-card {
+    flex-direction: column;
+  }
+  
+  .book-cover {
+    width: 100%;
+    height: 300rpx;
+  }
+  
+  .floating-player {
+    left: 20rpx;
+    right: 20rpx;
+  }
+}

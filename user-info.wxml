@@ -1,0 +1,186 @@
+<!-- pages/user-info/user-info.wxml -->
+<view class="user-info-container">
+  <!-- 顶部渐变背景 -->
+  <view class="header-bg" style="position: absolute; left: -4rpx; top: -20rpx; height: 308rpx; display: block; box-sizing: border-box"></view>
+  
+  <!-- 头像区域 -->
+  <view class="section-card">
+    <view class="section-title">头像</view>
+    <view class="avatar-section" bindtap="chooseAvatar">
+      <image src="{{userInfo.avatar}}" class="avatar-image" mode="aspectFill" />
+      <view class="avatar-right">
+        <text class="change-text">点击修改</text>
+        <image src="/images/icons/arrow-right.png" class="arrow-icon" />
+      </view>
+    </view>
+  </view>
+  
+  <!-- 昵称 -->
+  <view class="section-card">
+    <view class="section-title">昵称</view>
+    <view class="input-section">
+      <input 
+        type="text" 
+        value="{{userInfo.nickname}}" 
+        placeholder="请输入昵称" 
+        maxlength="20"
+        bindinput="onNicknameInput"
+        placeholder-class="placeholder"
+      />
+    </view>
+  </view>
+  
+  <!-- 英语水平 -->
+  <view class="section-card">
+    <view class="section-title">英语水平</view>
+    <picker 
+      range="{{levelList}}" 
+      value="{{selectedLevelIndex}}" 
+      bindchange="onLevelChange"
+      class="picker-section"
+    >
+      <view class="picker-content">
+        <text class="picker-value">{{userInfo.level}}</text>
+        <image src="/images/icons/arrow-right.png" class="arrow-icon" />
+      </view>
+    </picker>
+  </view>
+  
+  <!-- 手机号 -->
+  <view class="section-card">
+    <view class="section-title">手机号</view>
+    <view class="input-section" bindtap="showPhoneVerifyModal">
+      <text class="phone-text">{{userInfo.phone || '未绑定'}}</text>
+      <image src="/images/icons/arrow-right.png" class="arrow-icon" />
+    </view>
+  </view>
+  
+  <!-- 修改密码 -->
+  <view class="section-card">
+    <view class="section-title">账户安全</view>
+    <view class="menu-item" bindtap="showPasswordModal">
+      <view class="menu-icon">🔒</view>
+      <text class="menu-text">修改密码</text>
+      <image src="/images/icons/arrow-right.png" class="menu-arrow" />
+    </view>
+  </view>
+  
+  <!-- 保存按钮 -->
+  <view class="save-section" wx:if="{{hasChanges}}">
+    <button 
+      class="save-btn" 
+      bindtap="saveChanges" 
+      loading="{{isSaving}}" 
+      disabled="{{isSaving}}"
+    >
+      {{isSaving ? '保存中...' : '保存修改'}}
+    </button>
+  </view>
+  
+  <!-- 手机验证弹窗 -->
+  <view class="modal-mask" wx:if="{{showPhoneModal}}" catchtap="hidePhoneModal">
+    <view class="modal-content" catchtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">验证身份</text>
+        <view class="modal-close" bindtap="hidePhoneModal">×</view>
+      </view>
+      <view class="modal-body">
+        <view class="form-group">
+          <view class="form-label">原手机号</view>
+          <input 
+            type="number" 
+            value="{{phoneForm.oldPhone}}" 
+            placeholder="请输入原手机号" 
+            maxlength="11"
+            bindinput="onOldPhoneInput"
+            placeholder-class="placeholder"
+          />
+        </view>
+        <view class="form-group">
+          <view class="form-label">新手机号</view>
+          <input 
+            type="number" 
+            value="{{phoneForm.newPhone}}" 
+            placeholder="请输入新手机号" 
+            maxlength="11"
+            bindinput="onNewPhoneInput"
+            placeholder-class="placeholder"
+          />
+        </view>
+        <button 
+          class="verify-btn" 
+          bindtap="verifyPhoneChange"
+          loading="{{isVerifyingPhone}}"
+          disabled="{{isVerifyingPhone}}"
+        >
+          {{isVerifyingPhone ? '验证中...' : '验证并修改'}}
+        </button>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 密码修改弹窗 -->
+  <view class="modal-mask" wx:if="{{showPasswordModal}}" catchtap="hidePasswordModal">
+    <view class="modal-content" catchtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">修改密码</text>
+        <view class="modal-close" bindtap="hidePasswordModal">×</view>
+      </view>
+      <view class="modal-body">
+        <view class="form-group">
+          <view class="form-label">当前手机号</view>
+          <input 
+            type="text" 
+            value="{{passwordForm.phone}}" 
+            disabled
+            placeholder-class="placeholder"
+          />
+        </view>
+        <view class="form-group">
+          <view class="form-label">旧密码</view>
+          <input 
+            type="password" 
+            value="{{passwordForm.oldPassword}}" 
+            placeholder="请输入旧密码" 
+            bindinput="onOldPasswordInput"
+            placeholder-class="placeholder"
+          />
+        </view>
+        <view class="form-group">
+          <view class="form-label">新密码</view>
+          <input 
+            type="password" 
+            value="{{passwordForm.newPassword}}" 
+            placeholder="请输入新密码（6-20位）" 
+            bindinput="onNewPasswordInput"
+            placeholder-class="placeholder"
+          />
+        </view>
+        <view class="form-group">
+          <view class="form-label">确认新密码</view>
+          <input 
+            type="password" 
+            value="{{passwordForm.confirmPassword}}" 
+            placeholder="请再次输入新密码" 
+            bindinput="onConfirmPasswordInput"
+            placeholder-class="placeholder"
+          />
+        </view>
+        <button 
+          class="verify-btn" 
+          bindtap="changePassword"
+          loading="{{isChangingPassword}}"
+          disabled="{{isChangingPassword}}"
+        >
+          {{isChangingPassword ? '修改中...' : '确认修改'}}
+        </button>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 加载提示 -->
+  <view class="loading-container" wx:if="{{isLoading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+</view>

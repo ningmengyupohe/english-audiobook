@@ -1,0 +1,195 @@
+<view class="category-container">
+  <!-- 顶部背景 -->
+  <view class="header-bg"></view>
+  
+  <!-- 搜索栏 -->
+  <view class="search-section">
+  <view class="search-container" bindtap="onSearchTap">
+    <text class="search-icon">🔍</text>
+    <input 
+      class="search-input" 
+      placeholder="搜索分类或书籍..." 
+      placeholder-class="search-placeholder"
+      value="{{searchKeyword}}"
+      bindinput="onSearchInput"
+      bindconfirm="onSearchConfirm"
+      confirm-type="search"
+      disabled="{{true}}" 
+    />
+    <text class="search-clear" wx:if="{{searchKeyword}}" bindtap="clearSearch">✕</text>
+    <view class="search-action" bindtap="onSearchButtonTap">
+      <text class="search-button">搜索</text>
+    </view>
+  </view>
+  </view>
+  
+  <!-- 加载状态 -->
+  <view wx:if="{{isLoading}}" class="loading-overlay">
+    <view class="loading-content">
+      <image class="loading-gif" src="/images/loading.gif"></image>
+      <text class="loading-text">正在加载分类数据...</text>
+    </view>
+  </view>
+  
+  <!-- 错误状态 -->
+  <view wx:if="{{loadError && !isLoading}}" class="error-overlay">
+    <view class="error-content">
+      <text class="error-icon">😔</text>
+      <text class="error-title">{{errorMessage || '加载失败'}}</text>
+      <button class="retry-button" bindtap="retryLoad">重新加载</button>
+    </view>
+  </view>
+  
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">📚 全部分类</text>
+    <text class="page-subtitle" wx:if="{{!showSearchResults}}">
+      选择感兴趣的分类开始学习
+      <text wx:if="{{totalBookCount > 0}}" style="color: #FFC107; margin-left: 10rpx;">
+        📚 {{totalBookCount}} 本书籍
+      </text>
+    </text>
+    <text class="page-subtitle" wx:if="{{showSearchResults}}">
+      找到 {{categories.length}} 个相关分类
+    </text>
+  </view>
+  
+  <!-- 搜索提示 -->
+  <view class="search-tips" wx:if="{{showSearchResults}}">
+    <text class="search-tips-text">
+      🔍 搜索到 {{searchResults.length}} 个相关分类
+      <text class="clear-search" bindtap="clearSearch">清除搜索</text>
+    </text>
+  </view>
+  
+  <!-- 推荐书籍 -->
+  <view class="featured-section" wx:if="{{!showSearchResults && featuredBooks.length > 0}}">
+    <view class="section-header">
+      <text class="section-title">🔥 推荐精选</text>
+      <text class="section-more" bindtap="goToFeatured">更多</text>
+    </view>
+    <scroll-view class="featured-scroll" scroll-x="true">
+      <view class="featured-list">
+        <view class="featured-item" 
+              wx:for="{{featuredBooks}}" 
+              wx:key="id" 
+              data-id="{{item.id}}" 
+              bindtap="goToBookDetail"
+              hover-class="featured-item-hover"
+              hover-stay-time="100">
+          <view class="featured-badge" style="background-color: {{item.categoryColor || theme.primary}}">
+            {{item.category}}
+          </view>
+          <image src="{{item.cover}}" class="featured-cover" />
+          <view class="featured-info">
+            <text class="featured-title">{{item.title}}</text>
+            <text class="featured-author">{{item.author}}</text>
+            <view class="featured-rating">
+              <text class="rating-star">⭐</text>
+              <text class="rating-score">{{item.rating}}</text>
+            </view>
+            <text class="featured-desc">{{item.description}}</text>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+  
+  <!-- 分类网格 -->
+  <view class="categories-section">
+    <view class="section-header" wx:if="{{!showSearchResults}}">
+      <text class="section-title">📁 全部分类</text>
+      <text class="section-count">{{categories.length}} 个分类</text>
+    </view>
+    
+    <view class="empty-state" wx:if="{{categories.length === 0}}">
+      <text class="empty-icon">{{useDefaultData ? '📱' : '🔍'}}</text>
+      <text class="empty-text">{{useDefaultData ? '使用本地数据' : '未找到相关分类'}}</text>
+      <text class="empty-desc">{{useDefaultData ? '数据库连接失败，使用默认数据' : '换个关键词试试吧'}}</text>
+      <button class="empty-button" bindtap="retryLoad" wx:if="{{!useDefaultData && !showSearchResults}}">
+        重新加载
+      </button>
+    </view>
+    
+    <view class="categories-grid" wx:else>
+      <view class="category-card" 
+            wx:for="{{categories}}" 
+            wx:key="id"
+            data-id="{{item.id}}"
+            bindtap="goToCategoryList"
+            hover-class="category-card-hover"
+            hover-stay-time="200"
+            hover-start-time="50"
+            bindtouchstart="onCardTouchStart"
+            bindtouchend="onCardTouchEnd"
+            data-index="{{index}}"
+            animation="{{item.animationData}}">
+        <!-- 背景图片 -->
+        <image class="category-bg" src="{{item.bgImage || '/images/categories/default-bg.jpg'}}" mode="aspectFill" />
+        
+        <!-- 渐变遮罩 -->
+        <view class="category-overlay" style="background: {{item.gradient}}"></view>
+        
+        <!-- 热门/推荐角标 -->
+        <view class="category-corner" wx:if="{{item.isHot || item.isRecommend}}">
+          <text class="corner-text" wx:if="{{item.isHot}}">🔥</text>
+          <text class="corner-text" wx:if="{{item.isRecommend}}">⭐</text>
+        </view>
+        
+        <!-- 内容 -->
+        <view class="category-content" style="height: 318rpx; display: flex; box-sizing: border-box; left: 0rpx; top: 0rpx">
+          <view class="category-icon">
+            <text class="category-emoji">{{item.emoji || '📚'}}</text>
+          </view>
+          <view class="category-info">
+            <text class="category-name">{{item.name}}</text>
+            <text class="category-enname">{{item.enName}}</text>
+            <view class="category-meta">
+              <view class="meta-item" hover-class="meta-item-hover" hover-stay-time="100">
+                <text class="meta-icon">📚</text>
+                <text class="meta-text">{{item.bookCount}} 本</text>
+              </view>
+              <view class="meta-item" hover-class="meta-item-hover" hover-stay-time="100">
+                <text class="meta-icon">📊</text>
+                <text class="meta-text">{{item.difficulty}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+        
+        <!-- 悬停提示 -->
+        <view class="hover-hint" wx:if="{{item.showHint === true}}">
+          <text class="hover-text">点击进入分类</text>
+          <view class="hover-arrow">→</view>
+        </view>
+        
+        <!-- 悬浮动效 -->
+        <view class="hover-effect" wx:if="{{item.isHovering === true}}"></view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 随机推荐按钮 -->
+  <view class="random-section" wx:if="{{!showSearchResults && categories.length > 0}}">
+    <view class="random-card" 
+          bindtap="randomRecommend"
+          hover-class="random-card-hover"
+          hover-stay-time="100">
+      <view class="random-icon">🎲</view>
+      <view class="random-info">
+        <text class="random-title">随机推荐</text>
+        <text class="random-desc">不知道听什么？试试随机推荐</text>
+      </view>
+      <view class="random-arrow">→</view>
+    </view>
+  </view>
+  
+  <!-- 底部提示 -->
+  <view class="bottom-tips" wx:if="{{!showSearchResults}}">
+    <text class="tips-text">找不到想要的内容？</text>
+    <text class="tips-action" 
+          bindtap="goToSearch"
+          hover-class="tips-action-hover"
+          hover-stay-time="100">试试搜索功能 →</text>
+  </view>
+</view>

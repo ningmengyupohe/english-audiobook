@@ -1,0 +1,196 @@
+<view class="settings-container">
+  <!-- 头部 -->
+  <view class="settings-header">
+    <view class="back-btn" bindtap="goBack">
+      <image src="/images/icons/back.png" class="back-icon" />
+    </view>
+    <text class="header-title">设置</text>
+    <view class="header-right"></view>
+  </view>
+  
+  <!-- 设置内容 -->
+  <scroll-view class="settings-content" scroll-y>
+    <!-- 播放设置 -->
+    <view class="settings-section">
+      <text class="section-title">播放设置</text>
+      
+      <view class="settings-item" bindtap="goToPlaySettings">
+        <text class="item-text">播放器设置</text>
+        <image src="/images/icons/arrow-right.png" class="item-arrow" />
+      </view>
+      
+      <view class="settings-item">
+        <text class="item-text">定时关闭</text>
+        <picker class="item-value" range="{{timerOptions}}" value="{{timerIndex}}" bindchange="onTimerChange">
+          <text>{{timerOptions[timerIndex]}}</text>
+        </picker>
+      </view>
+      
+      <view class="settings-item">
+        <text class="item-text">播放速度</text>
+        <picker class="item-value" range="{{speedOptions}}" value="{{speedIndex}}" bindchange="onSpeedChange">
+          <text>{{speedOptions[speedIndex]}}</text>
+        </picker>
+      </view>
+      
+      <view class="settings-item">
+        <text class="item-text">跳过片头片尾</text>
+        <switch checked="{{skipIntro}}" color="#4A90E2" bindchange="onSkipIntroChange" />
+      </view>
+      
+      <view class="settings-item">
+        <text class="item-text">连续播放</text>
+        <switch checked="{{continuousPlay}}" color="#4A90E2" bindchange="onContinuousPlayChange" />
+      </view>
+    </view>
+    
+    <!-- 下载设置 -->
+    <view class="settings-section">
+      <text class="section-title">下载设置</text>
+      
+      <view class="settings-item">
+        <text class="item-text">仅Wi-Fi下载</text>
+        <switch checked="{{wifiOnly}}" color="#4A90E2" bindchange="onWifiOnlyChange" />
+      </view>
+      
+      <view class="settings-item">
+        <text class="item-text">自动删除已听</text>
+        <switch checked="{{autoDelete}}" color="#4A90E2" bindchange="onAutoDeleteChange" />
+      </view>
+      
+      <view class="settings-item">
+        <text class="item-text">下载音质</text>
+        <picker class="item-value" range="{{qualityOptions}}" value="{{qualityIndex}}" bindchange="onQualityChange">
+          <text>{{qualityOptions[qualityIndex]}}</text>
+        </picker>
+      </view>
+    </view>
+    
+    <!-- 显示设置 -->
+    <view class="settings-section">
+      <text class="section-title">显示设置</text>
+      
+      <view class="settings-item" bindtap="goToThemeSettings">
+        <text class="item-text">主题设置</text>
+        <view class="item-value">
+          <text>{{themeName}}</text>
+          <image src="/images/icons/arrow-right.png" class="item-arrow" />
+        </view>
+      </view>
+      
+      <view class="settings-item">
+        <text class="item-text">字体大小</text>
+        <slider 
+          value="{{fontSize}}" 
+          min="14" 
+          max="24" 
+          step="1"
+          activeColor="#4A90E2"
+          backgroundColor="#e5e5e5"
+          bindchange="onFontSizeChange"
+        />
+      </view>
+      
+      <view class="settings-item">
+        <text class="item-text">夜间模式</text>
+        <switch checked="{{nightMode}}" color="#4A90E2" bindchange="onNightModeChange" />
+      </view>
+      
+      <view class="settings-item">
+        <text class="item-text">显示字幕</text>
+        <switch checked="{{showSubtitles}}" color="#4A90E2" bindchange="onSubtitlesChange" />
+      </view>
+    </view>
+    
+    <!-- 通知设置 -->
+    <view class="settings-section">
+      <text class="section-title">通知设置</text>
+      
+      <view class="settings-item">
+        <text class="item-text">学习提醒</text>
+        <switch checked="{{studyReminder}}" color="#4A90E2" bindchange="onStudyReminderChange" />
+      </view>
+      
+      <view class="settings-item" wx:if="{{studyReminder}}">
+        <text class="item-text">提醒时间</text>
+        <picker 
+          class="item-value" 
+          mode="time" 
+          value="{{reminderTime}}" 
+          bindchange="onReminderTimeChange"
+        >
+          <text>{{reminderTime}}</text>
+        </picker>
+      </view>
+      
+      <view class="settings-item">
+        <text class="item-text">新书提醒</text>
+        <switch checked="{{newBookNotify}}" color="#4A90E2" bindchange="onNewBookNotifyChange" />
+      </view>
+      
+      <view class="settings-item">
+        <text class="item-text">更新提醒</text>
+        <switch checked="{{updateNotify}}" color="#4A90E2" bindchange="onUpdateNotifyChange" />
+      </view>
+    </view>
+    
+    <!-- 账号与安全 -->
+    <view class="settings-section">
+      <text class="section-title">账号与安全</text>
+      
+      <view class="settings-item" bindtap="goToAccountSecurity">
+        <text class="item-text">账号安全</text>
+        <image src="/images/icons/arrow-right.png" class="item-arrow" />
+      </view>
+      
+      <view class="settings-item" bindtap="goToPrivacySettings">
+        <text class="item-text">隐私设置</text>
+        <image src="/images/icons/arrow-right.png" class="item-arrow" />
+      </view>
+      
+      <view class="settings-item" bindtap="clearCache">
+        <text class="item-text">清理缓存</text>
+        <view class="item-value">
+          <text>{{cacheSize}}</text>
+          <text class="clear-btn">清理</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 关于 -->
+    <view class="settings-section">
+      <text class="section-title">关于</text>
+      
+      <view class="settings-item" bindtap="goToAbout">
+        <text class="item-text">关于英语听书</text>
+        <view class="item-value">
+          <text>v{{version}}</text>
+          <image src="/images/icons/arrow-right.png" class="item-arrow" />
+        </view>
+      </view>
+      
+      <view class="settings-item" bindtap="checkUpdate">
+        <text class="item-text">检查更新</text>
+        <view class="item-value">
+          <text wx:if="{{hasUpdate}}">有更新</text>
+          <text wx:else>已是最新版</text>
+        </view>
+      </view>
+      
+      <view class="settings-item" bindtap="goToFeedback">
+        <text class="item-text">意见反馈</text>
+        <image src="/images/icons/arrow-right.png" class="item-arrow" />
+      </view>
+      
+      <view class="settings-item" bindtap="goToHelp">
+        <text class="item-text">帮助中心</text>
+        <image src="/images/icons/arrow-right.png" class="item-arrow" />
+      </view>
+    </view>
+    
+    <!-- 退出登录 -->
+    <view class="logout-section" wx:if="{{isLoggedIn}}">
+      <button class="logout-btn" bindtap="logout">退出登录</button>
+    </view>
+  </scroll-view>
+</view>

@@ -1,0 +1,119 @@
+<view class="wordmatch-container">
+  <!-- 顶部栏 -->
+  <view class="game-header">
+    <view class="back-btn" bindtap="goBack">←</view>
+    <text class="game-title">单词连连看</text>
+    <view class="score">
+      <text>得分: {{score}}</text>
+      <text class="timer">时间: {{formatTime(timeLeft)}}</text>
+    </view>
+  </view>
+  
+  <!-- 游戏说明 -->
+  <view class="instructions" wx:if="{{!gameStarted}}">
+    <text class="instruction-title">游戏说明</text>
+    <text class="instruction-text">将左边的英文单词与右边的正确中文释义连接起来</text>
+    <view class="start-btn" bindtap="startGame">
+      <text>开始游戏</text>
+    </view>
+  </view>
+  
+  <!-- 游戏区域 -->
+  <view class="game-area" wx:if="{{gameStarted}}">
+    <!-- 当前关卡 -->
+    <view class="level-info">
+      <text class="level-title">第{{currentLevel}}关</text>
+      <text class="matches-count">已匹配: {{matchedCount}}/{{totalPairs}}</text>
+    </view>
+    
+    <!-- 连线区域 -->
+    <view class="matching-area">
+      <!-- 英文单词区 -->
+      <view class="english-words">
+        <view class="word-column">
+          <view class="word-item" 
+                wx:for="{{englishWords}}" 
+                wx:key="index"
+                data-index="{{index}}"
+                bindtouchstart="startConnect"
+                style="{{englishStyles[index]}}">
+            <text class="word-text">{{item}}</text>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 中文释义区 -->
+      <view class="chinese-words">
+        <view class="word-column">
+          <view class="word-item" 
+                wx:for="{{chineseWords}}" 
+                wx:key="index"
+                data-index="{{index}}"
+                bindtouchstart="endConnect"
+                style="{{chineseStyles[index]}}">
+            <text class="word-text">{{item}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 控制按钮 -->
+    <view class="control-buttons">
+      <view class="btn hint-btn" bindtap="showHint">
+        <text>提示</text>
+      </view>
+      <view class="btn reset-btn" bindtap="resetConnections">
+        <text>重置</text>
+      </view>
+      <view class="btn check-btn" bindtap="checkMatches">
+        <text>检查</text>
+      </view>
+    </view>
+    
+    <!-- 当前连线 -->
+    <view class="connection-area">
+      <text wx:if="{{currentConnection}}">正在连接: {{currentConnection.from}} → ?</text>
+    </view>
+    
+    <!-- 进度条 -->
+    <view class="progress-section">
+      <view class="progress-bar">
+        <view class="progress-fill" style="width: {{(matchedCount/totalPairs)*100}}%;"></view>
+      </view>
+      <text class="progress-text">{{matchedCount}}/{{totalPairs}}</text>
+    </view>
+  </view>
+  
+  <!-- 结果弹窗 -->
+  <view class="result-modal" wx:if="{{showResult}}">
+    <view class="modal-content">
+      <text class="result-icon">{{resultIcon}}</text>
+      <text class="result-title">{{resultTitle}}</text>
+      <text class="result-score">得分: +{{levelScore}}分</text>
+      <text class="result-time">用时: {{formatTime(levelTime)}}</text>
+      
+      <view class="result-buttons">
+        <view class="result-btn next-btn" bindtap="nextLevel" wx:if="{{!gameCompleted}}">
+          <text>下一关</text>
+        </view>
+        <view class="result-btn restart-btn" bindtap="restartGame" wx:if="{{gameCompleted}}">
+          <text>重新开始</text>
+        </view>
+        <view class="result-btn back-btn" bindtap="backToPlayer">
+          <text>返回播放器</text>
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 提示弹窗 -->
+  <view class="hint-modal" wx:if="{{showHintModal}}">
+    <view class="hint-content">
+      <text class="hint-title">💡 提示</text>
+      <text class="hint-text">{{hintText}}</text>
+      <view class="hint-close" bindtap="closeHint">
+        <text>我知道了</text>
+      </view>
+    </view>
+  </view>
+</view>

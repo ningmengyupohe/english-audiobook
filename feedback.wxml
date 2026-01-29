@@ -1,0 +1,140 @@
+<view class="feedback-container">
+  <!-- 头部 -->
+  <view class="feedback-header">
+    <view class="back-btn" bindtap="goBack">
+      <image src="/images/icons/back.png" class="back-icon" />
+    </view>
+    <text class="header-title">意见反馈</text>
+    <view class="header-right"></view>
+  </view>
+  
+  <!-- 反馈内容 -->
+  <scroll-view class="feedback-content" scroll-y>
+    <!-- 反馈类型 -->
+    <view class="feedback-section" style="width: 691rpx; height: 554rpx; display: block; box-sizing: border-box">
+      <text class="section-title">反馈类型</text>
+      <view class="type-grid">
+        <block wx:for="{{feedbackTypes}}" wx:key="id">
+          <view 
+            class="type-item {{selectedType === item.id ? 'selected' : ''}}" 
+            bindtap="selectType" 
+            data-id="{{item.id}}"
+          >
+            <image src="{{item.icon}}" class="type-icon" />
+            <text class="type-text">{{item.name}}</text>
+          </view>
+        </block>
+      </view>
+    </view>
+    
+    <!-- 问题描述 -->
+    <view class="feedback-section" style="width: 691rpx; height: 527rpx; display: block; box-sizing: border-box">
+      <text class="section-title">问题描述</text>
+      <view class="input-container">
+        <textarea 
+          placeholder="请详细描述您遇到的问题或建议，至少10个字..."
+          value="{{content}}"
+          maxlength="500"
+          class="content-input"
+          bindinput="onContentInput"
+        />
+        <view class="input-footer">
+          <text class="word-count">{{content.length}}/500</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 联系方式 -->
+    <view class="feedback-section" style="width: 691rpx; height: 479rpx; display: block; box-sizing: border-box">
+      <text class="section-title">联系方式（选填）</text>
+      <view class="contact-inputs">
+        <view class="contact-item">
+          <text class="contact-label">手机号</text>
+          <input 
+            type="number" 
+            placeholder="请输入手机号" 
+            value="{{contact.phone}}"
+            maxlength="11"
+            class="contact-input"
+            bindinput="onPhoneInput"
+          />
+        </view>
+        <view class="contact-item">
+          <text class="contact-label">QQ号</text>
+          <input 
+            type="number" 
+            placeholder="请输入QQ号" 
+            value="{{contact.qq}}"
+            maxlength="15"
+            class="contact-input"
+            bindinput="onQQInput"
+          />
+        </view>
+        <view class="contact-item">
+          <text class="contact-label">邮箱</text>
+          <input 
+            type="text" 
+            placeholder="请输入邮箱" 
+            value="{{contact.email}}"
+            class="contact-input"
+            bindinput="onEmailInput"
+          />
+        </view>
+      </view>
+    </view>
+    
+    <!-- 上传截图 -->
+    <view class="feedback-section" style="width: 691rpx; height: 404rpx; display: block; box-sizing: border-box">
+      <text class="section-title">上传截图（选填，最多3张）</text>
+      <view class="upload-container">
+        <block wx:for="{{images}}" wx:key="index">
+          <view class="image-preview">
+            <image src="{{item}}" class="preview-image" mode="aspectFill" />
+            <view class="image-delete" bindtap="deleteImage" data-index="{{index}}">
+              <image src="/images/icons/close.png" class="delete-icon" />
+            </view>
+          </view>
+        </block>
+        
+        <view class="upload-btn" bindtap="chooseImage" wx:if="{{images.length < 3}}">
+          <image src="/images/icons/upload.png" class="upload-icon" />
+          <text class="upload-text">上传截图</text>
+        </view>
+      </view>
+      <text class="upload-tip">建议上传问题相关截图，有助于我们快速定位问题</text>
+    </view>
+    
+    <!-- 提交按钮 -->
+    <view class="submit-section">
+      <button 
+        class="submit-btn {{canSubmit ? '' : 'disabled'}}" 
+        bindtap="submitFeedback"
+        disabled="{{!canSubmit}}"
+       style="position: relative; left: -45rpx; top: 10rpx; height: 85rpx; display: block; box-sizing: border-box">
+        提交反馈
+      </button>
+    </view>
+    
+    <!-- 反馈历史 -->
+    <view class="history-section" wx:if="{{history.length > 0}}" style="width: 691rpx; display: block; box-sizing: border-box">
+      <text class="section-title">反馈历史</text>
+      <view class="history-list">
+        <block wx:for="{{history}}" wx:key="id">
+          <view class="history-item">
+            <view class="history-header">
+              <text class="history-type">{{getTypeName(item.type)}}</text>
+              <text class="history-time">{{formatTime(item.createTime)}}</text>
+            </view>
+            <text class="history-content">{{item.content}}</text>
+            <view class="history-status">
+              <text class="status-badge status-{{item.status}}">
+                {{getStatusText(item.status)}}
+              </text>
+              <text class="history-reply" wx:if="{{item.reply}}">已回复</text>
+            </view>
+          </view>
+        </block>
+      </view>
+    </view>
+  </scroll-view>
+</view>

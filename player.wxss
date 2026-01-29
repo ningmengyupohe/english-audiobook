@@ -1,0 +1,751 @@
+/* 重置样式 */
+page {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  min-height: 100vh;
+}
+
+/* 播放器容器 */
+.player-container {
+  min-height: 100vh;
+  padding-bottom: 40rpx;
+}
+
+/* 顶部背景 */
+.header-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 400rpx;
+  background: linear-gradient(135deg, #4fc3f7 0%, #29b6f6 100%);
+  border-radius: 0 0 50% 50%;
+  z-index: 0;
+}
+
+/* 返回按钮 */
+.back-button {
+  position: absolute;
+  top: 60rpx;
+  left: 30rpx;
+  width: 80rpx;
+  height: 80rpx;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  box-shadow: 0 4rpx 12rpx rgba(33, 150, 243, 0.2);
+  transition: all 0.3s ease;
+}
+
+.back-button:active {
+  transform: scale(0.95);
+}
+
+.back-icon {
+  font-size: 40rpx;
+  color: #2196f3;
+}
+
+/* 圆形封面区域 */
+.cover-section {
+  display: flex;
+  justify-content: center;
+  margin-top: 100rpx;
+  position: relative;
+  z-index: 1;
+}
+
+.album-cover {
+  width: 500rpx;
+  height: 500rpx;
+  border-radius: 50%;
+  border: 8rpx solid white;
+  box-shadow: 0 20rpx 40rpx rgba(33, 150, 243, 0.3);
+  animation: rotate 20s linear infinite;
+  animation-play-state: paused;
+}
+
+.album-cover.playing {
+  animation-play-state: running;
+}
+
+@keyframes rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.disc-shadow {
+  position: absolute;
+  width: 520rpx;
+  height: 520rpx;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(33, 150, 243, 0.1) 0%, rgba(33, 150, 243, 0) 70%);
+  z-index: -1;
+}
+
+/* 歌曲信息 */
+.song-info {
+  margin-top: 50rpx;
+  text-align: center;
+  padding: 0 40rpx;
+}
+
+.song-title {
+  display: block;
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #1565c0;
+  margin-bottom: 20rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.song-artist {
+  display: block;
+  font-size: 28rpx;
+  color: #2196f3;
+  margin-bottom: 10rpx;
+}
+
+.song-album {
+  display: block;
+  font-size: 24rpx;
+  color: #64b5f6;
+}
+
+/* 优化后的进度条区域 */
+.progress-section {
+  margin: 60rpx 40rpx 40rpx;
+  padding: 30rpx;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 25rpx;
+  box-shadow: 0 10rpx 30rpx rgba(33, 150, 243, 0.1);
+  backdrop-filter: blur(10rpx);
+}
+
+/* 时间显示 */
+.time-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 30rpx;
+  font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
+}
+
+.time-current {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #2196f3;
+  min-width: 90rpx;
+  text-align: right;
+}
+
+.time-divider {
+  font-size: 24rpx;
+  color: #90caf9;
+  margin: 0 15rpx;
+  opacity: 0.6;
+}
+
+.time-total {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #666;
+  min-width: 90rpx;
+  text-align: left;
+}
+
+/* 进度条容器 */
+.progress-container {
+  position: relative;
+  height: 50rpx;
+  margin-bottom: 25rpx;
+}
+
+/* 背景轨道 */
+.progress-track-bg {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 6rpx;
+  background: linear-gradient(to right, #e0f7fa, #bbdefb);
+  border-radius: 3rpx;
+  transform: translateY(-50%);
+  overflow: hidden;
+}
+
+/* 缓冲进度 */
+.progress-buffered {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 6rpx;
+  background: rgba(144, 202, 249, 0.3);
+  border-radius: 3rpx;
+  transform: translateY(-50%);
+  transition: width 0.3s ease;
+}
+
+/* 已播放进度 */
+.progress-played {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 20rpx;
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+.progress-played-fill {
+  position: relative;
+  height: 8rpx;
+  background: #2196f3;
+  border-radius: 4rpx;
+  overflow: hidden;
+}
+
+.progress-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, 
+    #4fc3f7 0%, 
+    #2196f3 25%, 
+    #1976d2 50%, 
+    #2196f3 75%, 
+    #4fc3f7 100%);
+  animation: gradientFlow 2s linear infinite;
+  background-size: 200% 100%;
+}
+
+@keyframes gradientFlow {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* 播放头（滑块） */
+.progress-knob {
+  position: absolute;
+  top: 50%;
+  right: -20rpx;
+  width: 40rpx;
+  height: 40rpx;
+  transform: translateY(-50%);
+  z-index: 3;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.knob-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 26rpx;
+  height: 26rpx;
+  background: white;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 4rpx 15rpx rgba(33, 150, 243, 0.4),
+              0 0 0 3rpx rgba(255, 255, 255, 0.8);
+  transition: all 0.2s ease;
+}
+
+.progress-knob:active .knob-core {
+  width: 32rpx;
+  height: 32rpx;
+  box-shadow: 0 6rpx 20rpx rgba(33, 150, 243, 0.6),
+              0 0 0 4rpx rgba(255, 255, 255, 0.9);
+}
+
+.knob-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40rpx;
+  height: 40rpx;
+  background: radial-gradient(circle, 
+    rgba(79, 195, 247, 0.3) 0%, 
+    rgba(79, 195, 247, 0.1) 50%, 
+    transparent 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: pulseGlow 2s infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.5;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+/* 点击区域 */
+.progress-touch-area {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 60rpx;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+/* 进度信息 */
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid rgba(144, 202, 249, 0.2);
+}
+
+.progress-text {
+  font-size: 24rpx;
+  color: #4fc3f7;
+  font-weight: 500;
+  background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+  padding: 6rpx 15rpx;
+  border-radius: 15rpx;
+}
+
+.chapter-text {
+  font-size: 22rpx;
+  color: #90caf9;
+  opacity: 0.8;
+}
+
+/* 播放时的动画效果 */
+.progress-played .progress-gradient {
+  animation-play-state: running;
+}
+
+/* 暂停时的效果 */
+.is-paused .progress-gradient {
+  animation-play-state: paused;
+}
+
+/* 触摸时的效果 */
+.is-seeking .progress-knob .knob-core {
+  transform: translate(-50%, -50%) scale(1.2);
+  box-shadow: 0 8rpx 25rpx rgba(33, 150, 243, 0.8),
+              0 0 0 5rpx rgba(255, 255, 255, 0.95);
+}
+
+.is-seeking .knob-glow {
+  animation: seekingGlow 0.5s infinite alternate;
+}
+
+@keyframes seekingGlow {
+  from {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+  to {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(1.4);
+  }
+}
+
+/* 圆形播放控制 */
+.player-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 40rpx 60rpx;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 100rpx;
+  padding: 20rpx 40rpx;
+  box-shadow: 0 8rpx 24rpx rgba(33, 150, 243, 0.1);
+}
+
+.control-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10rpx;
+  min-width: 90rpx;
+}
+
+.control-icon {
+  width: 80rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 38rpx;
+  color: #2196f3;
+  transition: all 0.3s ease;
+}
+
+.control-item:active .control-icon {
+  transform: scale(0.95);
+  opacity: 0.8;
+}
+
+.control-text {
+  font-size: 22rpx;
+  color: #64b5f6;
+  margin-top: 8rpx;
+}
+
+/* 播放/暂停按钮 */
+.play-pause {
+  background: linear-gradient(135deg, #2196f3, #1976d2);
+  border-radius: 50%;
+  padding: 0;
+  margin: -10rpx;
+}
+
+.play-icon-container {
+  width: 120rpx;
+  height: 120rpx;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 24rpx rgba(33, 150, 243, 0.3);
+  transition: all 0.3s ease;
+}
+
+.play-pause:active .play-icon-container {
+  transform: scale(0.95);
+}
+
+.play-icon {
+  font-size: 50rpx;
+  color: #2196f3;
+  margin-left: 8rpx;
+}
+
+/* 功能按钮 */
+.action-buttons {
+  display: flex;
+  justify-content: space-around;
+  margin: 30rpx 40rpx;
+  padding: 25rpx 0;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50rpx;
+  box-shadow: 0 8rpx 24rpx rgba(33, 150, 243, 0.1);
+}
+
+.action-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 90rpx;
+}
+
+.action-icon {
+  width: 70rpx;
+  height: 70rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34rpx;
+  background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+  border-radius: 50%;
+  color: #2196f3;
+  transition: all 0.3s ease;
+}
+
+.action-item:active .action-icon {
+  transform: scale(0.95);
+}
+
+.favorite-active .action-icon {
+  background: linear-gradient(135deg, #ffcdd2, #ef5350);
+  color: #d32f2f;
+}
+
+.download-active .action-icon {
+  background: linear-gradient(135deg, #c8e6c9, #66bb6a);
+  color: #388e3c;
+}
+
+.action-text {
+  font-size: 22rpx;
+  color: #2196f3;
+  margin-top: 10rpx;
+}
+
+/* 音量控制 */
+.volume-section {
+  margin: 30rpx 40rpx;
+  padding: 30rpx;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50rpx;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 8rpx 24rpx rgba(33, 150, 243, 0.1);
+}
+
+.volume-icon {
+  font-size: 40rpx;
+  color: #2196f3;
+  margin-right: 30rpx;
+}
+
+.volume-bar {
+  flex: 1;
+  height: 8rpx;
+  background: #e3f2fd;
+  border-radius: 4rpx;
+  position: relative;
+}
+
+.volume-track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 4rpx;
+}
+
+.volume-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(to right, #4fc3f7, #2196f3);
+  border-radius: 4rpx;
+}
+
+.volume-dot {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 32rpx;
+  height: 32rpx;
+  background: white;
+  border: 3rpx solid #2196f3;
+  border-radius: 50%;
+  box-shadow: 0 4rpx 8rpx rgba(33, 150, 243, 0.3);
+}
+
+/* 章节列表和学习统计 */
+.chapter-section,
+.study-stats {
+  margin: 30rpx 40rpx;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 30rpx;
+  padding: 30rpx;
+  box-shadow: 0 8rpx 24rpx rgba(33, 150, 243, 0.1);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.section-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #1565c0;
+}
+
+.section-count {
+  font-size: 24rpx;
+  color: #64b5f6;
+}
+
+/* 章节列表 */
+.chapter-list {
+  max-height: 400rpx;
+}
+
+.chapter-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #e3f2fd;
+  transition: all 0.3s ease;
+}
+
+.chapter-item:active {
+  background: rgba(227, 242, 253, 0.5);
+  border-radius: 15rpx;
+  transform: translateY(-2rpx);
+}
+
+.chapter-item:last-child {
+  border-bottom: none;
+}
+
+.chapter-info {
+  flex: 1;
+  padding-right: 20rpx;
+}
+
+.chapter-title {
+  display: block;
+  font-size: 26rpx;
+  color: #2196f3;
+  margin-bottom: 10rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chapter-duration {
+  font-size: 22rpx;
+  color: #90caf9;
+}
+
+.chapter-status {
+  display: flex;
+  align-items: center;
+  min-width: 120rpx;
+}
+
+.status-icon {
+  font-size: 28rpx;
+  color: #2196f3;
+  margin-right: 10rpx;
+}
+
+.status-text {
+  font-size: 22rpx;
+  color: #64b5f6;
+}
+
+/* 学习统计 */
+.stats-card {
+  background: linear-gradient(135deg, #bbdefb, #90caf9);
+  border-radius: 20rpx;
+  padding: 30rpx;
+  transition: all 0.3s ease;
+}
+
+.stats-card:active {
+  transform: translateY(-2rpx);
+  box-shadow: 0 12rpx 32rpx rgba(33, 150, 243, 0.2);
+}
+
+.stats-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.stats-title {
+  font-size: 28rpx;
+  color: #1565c0;
+  font-weight: bold;
+}
+
+.stats-time {
+  font-size: 24rpx;
+  color: #2196f3;
+}
+
+.stats-content {
+  display: flex;
+  justify-content: space-around;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.stat-icon {
+  font-size: 36rpx;
+  color: #2196f3;
+  margin-bottom: 10rpx;
+}
+
+.stat-value {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #1565c0;
+  margin-bottom: 5rpx;
+}
+
+.stat-label {
+  font-size: 22rpx;
+  color: #64b5f6;
+}
+
+/* 歌词区域 */
+.lyrics-section {
+  margin: 30rpx 40rpx;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 30rpx;
+  padding: 30rpx;
+  box-shadow: 0 8rpx 24rpx rgba(33, 150, 243, 0.1);
+}
+
+.lyrics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.lyrics-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #1565c0;
+}
+
+.lyrics-close {
+  font-size: 24rpx;
+  color: #2196f3;
+  padding: 10rpx 20rpx;
+  background: #e3f2fd;
+  border-radius: 20rpx;
+  transition: all 0.3s ease;
+}
+
+.lyrics-close:active {
+  background: #bbdefb;
+  transform: scale(0.95);
+}
+
+.lyrics-container {
+  max-height: 400rpx;
+}
+
+.lyrics-line {
+  padding: 20rpx 0;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.lyrics-line:active {
+  background: rgba(227, 242, 253, 0.5);
+  border-radius: 15rpx;
+}
+
+.lyric-text {
+  font-size: 28rpx;
+  color: #64b5f6;
+  line-height: 1.4;
+  transition: all 0.3s ease;
+}
+
+.lyric-text.active {
+  color: #2196f3;
+  font-weight: bold;
+  font-size: 32rpx;
+  text-shadow: 0 2rpx 4rpx rgba(33, 150, 243, 0.2);
+}
